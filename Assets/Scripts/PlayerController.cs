@@ -1,19 +1,6 @@
 
 using UnityEngine;
 
-[System.Serializable]
-struct PlayerStats
-{
-    public float walkSpeed;
-    public float sprintSpeed;
-    [Space(5)]
-    public float jumpForce;
-    [Range(1, 5)] public int maxJumpCount;
-    [Space(5)]
-    [Range(0, 100)] public float acceleration;
-    [Range(0, 100)] public float deceleration;
-}
-
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] PlayerStats _Stats;
@@ -22,7 +9,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float _CoyoteTime;
     [Space(5)]
     [SerializeField] float _Gravity;
-    [SerializeField] float _MaxGravity; 
+    [SerializeField] float _MaxGravity;
     [Space(5)]
     [SerializeField][Range(1, 20)] int _MaxIteration;
     [SerializeField][Range(0, 5)] float _GroundDistance;
@@ -87,16 +74,16 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
-        InputManager.OnPlayerMove += OnMove;        // Subscrive to Move Input
-        InputManager.OnPlayerJump += OnJump;        // Subscrive to Jump Input
-        InputManager.OnPlayerSprint += OnSprint;    // Subscrive to Sprint Input
+        GameEvents.Input.OnPlayerMove += OnMove;          // Subscrive to Move Input
+        GameEvents.Input.OnPlayerJump += OnJump;          // Subscrive to Jump Input
+        GameEvents.Input.OnPlayerSprint += OnSprint;      // Subscrive to Sprint Input
     }
 
     private void OnDisable()
     {
-        InputManager.OnPlayerMove -= OnMove;        // Unsubscrive from Move Input
-        InputManager.OnPlayerJump -= OnJump;        // Unsubscrive from Jump Input
-        InputManager.OnPlayerSprint -= OnSprint;    // Subscrive to Sprint Input
+        GameEvents.Input.OnPlayerMove -= OnMove;        // Unsubscrive from Move Input
+        GameEvents.Input.OnPlayerJump -= OnJump;        // Unsubscrive from Jump Input
+        GameEvents.Input.OnPlayerSprint -= OnSprint;    // Subscrive to Sprint Input
     }
 
     private void Update()
