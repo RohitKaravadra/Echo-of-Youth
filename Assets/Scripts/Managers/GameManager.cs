@@ -38,7 +38,7 @@ public class GameManager : MonoBehaviour
         _GameState = newState == GameState.Start ? GameState.Play : newState;
 
         Time.timeScale = _GameState == GameState.Pause ? 0 : 1;
-        GameEvents.Game.OnGameStateChanged(newState);
+        GameEvents.Game.OnGameStateChanged?.Invoke(newState);
     }
 
     private void OnUICancel()

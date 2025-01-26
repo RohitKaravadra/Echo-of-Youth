@@ -7,13 +7,14 @@ public class PlayerController : MonoBehaviour
     [Space(5)]
     [SerializeField] bool _AirControl;
     [SerializeField] float _CoyoteTime;
+    [SerializeField][Range(0.0001f, 0.1f)] float _MoveThreshold;
     [Space(5)]
     [SerializeField] float _Gravity;
     [SerializeField] float _MaxGravity;
     [Space(5)]
     [SerializeField][Range(1, 20)] int _MaxIteration;
-    [SerializeField][Range(0, 5)] float _GroundDistance;
-    [SerializeField][Range(0, 5)] float _CellingDistance;
+    [SerializeField][Range(0, 1)] float _GroundDistance;
+    [SerializeField][Range(0, 1)] float _CellingDistance;
     [Space(5)]
     [SerializeField][Range(0, 90)] float _GravitySlideAngle;
     [SerializeField][Range(0, 90)] float _SurfaceSlideAngle;
@@ -22,7 +23,7 @@ public class PlayerController : MonoBehaviour
     [Space(5)]
     [SerializeField] CapsuleCollider2D _Collider;
     [SerializeField] Animator _Animator;
-    [SerializeField] SpriteRenderer _Visuals;
+    [SerializeField] Transform _Visuals;
 
     // Input variables
     Vector2 _Direction;
@@ -50,7 +51,6 @@ public class PlayerController : MonoBehaviour
     float _XVelocity;
     float _YVelocity;
 
-
     private void Awake()
     {
         _Rb = GetComponent<Rigidbody2D>();
@@ -58,15 +58,8 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
-        _XDirection = 0;
-        _XVelocity = _YVelocity = 0;
-
-        _LastGroundTime = Time.time;
-
-        _GroundFilter.useLayerMask = true;
-        _GroundFilter.layerMask = _GroundLayers;
-
-        SetSlideData();
+        OnAirControlChanged();
+        SetData();
 
         // set camera follow target to this object
         CameraManager.Instance.FollowTarget = transform;
@@ -74,6 +67,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
+        GameEvents.UI.OnAirControlChanged += OnAirControlChanged;   //**for testing only
         GameEvents.Input.OnPlayerMove += OnMove;          // Subscrive to Move Input
         GameEvents.Input.OnPlayerJump += OnJump;          // Subscrive to Jump Input
         GameEvents.Input.OnPlayerSprint += OnSprint;      // Subscrive to Sprint Input
@@ -81,6 +75,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnDisable()
     {
+        GameEvents.UI.OnAirControlChanged -= OnAirControlChanged;   //**for testing only
         GameEvents.Input.OnPlayerMove -= OnMove;        // Unsubscrive from Move Input
         GameEvents.Input.OnPlayerJump -= OnJump;        // Unsubscrive from Jump Input
         GameEvents.Input.OnPlayerSprint -= OnSprint;    // Subscrive to Sprint Input
@@ -99,21 +94,38 @@ public class PlayerController : MonoBehaviour
         Move(Time.fixedDeltaTime);  // apply movement
     }
 
+    // **for testing only
+    private void OnAirControlChanged()
+    {
+        _AirControl = Settings.s_AirControlEnabled; // **for testing only
+    }
+
     /// <summary>
     /// Set default Slide data
     /// </summary>
-    private void SetSlideData()
+    private void SetData()
     {
+        // inititalize variables
+        _XDirection = 0;
+        _XVelocity = 0;
+        _YVelocity = 0;
+
+        _LastGroundTime = Time.time;
+
+        // Set ground filter for foot and head collision check
+        _GroundFilter.useLayerMask = true;
+        _GroundFilter.layerMask = _GroundLayers;
+
+        // set slide data for movement collisions
         _SlideData.maxIterations = _MaxIteration;
         _SlideData.gravitySlipAngle = _GravitySlideAngle;
         _SlideData.surfaceSlideAngle = _SurfaceSlideAngle;
 
-        _SlideData.surfaceUp = Vector2.up;
         _SlideData.gravity = Vector2.down;
+        _SlideData.surfaceUp = Vector2.up;
 
+        _SlideData.SetLayerMask(_GroundLayers);
         _SlideData.useSimulationMove = true;
-        _SlideData.useLayerMask = true;
-        _SlideData.layerMask = _GroundLayers;
     }
 
     private void SetYVelocity(float deltaTime)
@@ -134,9 +146,10 @@ public class PlayerController : MonoBehaviour
         // check if jumping and collides 
         if (_IsJumping)
         {
+            // bounce back from collision to prevent wall stuck
             if (_SlideResults.slideHit)
             {
-                _XVelocity = -_XVelocity * 0.3f; // bounce back from collision
+                _XVelocity = -_XVelocity * 0.3f;
                 return;
             }
 
@@ -148,10 +161,19 @@ public class PlayerController : MonoBehaviour
         // set horizontal velocity
         _XDirection = _IsMoving ? Mathf.CeilToInt(_Direction.x) : _XDirection;
 
-        float speed = _IsMoving ? (_IsSprint ? _Stats.sprintSpeed : _Stats.walkSpeed) : 0;
+        // set speed and acceleration
+        float speed, accel;
+        speed = _IsMoving ? (_IsSprint ? _Stats.sprintSpeed : _Stats.walkSpeed) : 0;
+        speed = _XDirection * speed;
+        accel = _IsMoving ? _Stats.acceleration : _Stats.deceleration;
 
-        float targetVel = _XDirection * speed;
-        _XVelocity = Mathf.Lerp(_XVelocity, targetVel, deltaTime * (_IsMoving ? _Stats.acceleration : _Stats.deceleration));
+        // set velocity
+        _XVelocity = Mathf.Abs(_XVelocity - speed) > _MoveThreshold ?
+            Mathf.Lerp(_XVelocity, speed, deltaTime * accel) : speed;
+
+        // swap visuals if needed
+        if (_XVelocity != 0)
+            _Visuals.localScale = new Vector3(_XVelocity < 0 ? -1 : 1, 1, 1);
     }
 
     private void UpdateMovement(float deltaTime)
@@ -160,7 +182,7 @@ public class PlayerController : MonoBehaviour
         SetYVelocity(deltaTime);    // Set vertical velocity
         SetXVelocity(deltaTime);    // Set horizontal velocity
 
-        // set ground snap distance
+        // set ground snap distance to prevent snapping when jump
         _SlideData.surfaceAnchor = new Vector2(0, _IsJumping ? 0 : -_GroundDistance);
     }
 
@@ -188,10 +210,10 @@ public class PlayerController : MonoBehaviour
     {
         bool wasGrounded = _IsGrounded;
 
-        // foot collision
-        _IsGrounded = _YVelocity <= 0 && _Collider.Cast(Vector2.down, _GroundFilter, _HitResults, _GroundDistance) > 0;
-        // head collision
-        _IsHeadCollide = _YVelocity > 0 && _Collider.Cast(Vector2.up, _GroundFilter, _HitResults, _CellingDistance) > 0;
+
+        _IsGrounded = _YVelocity <= 0 && _Collider.Cast(Vector2.down, _GroundFilter, _HitResults, _GroundDistance) > 0; // foot collision
+        _IsHeadCollide = _YVelocity > 0 && _Collider.Cast(Vector2.up, _GroundFilter, _HitResults, _CellingDistance) > 0;    // head collision
+
 
         if (wasGrounded && !_IsGrounded)
             _LastGroundTime = Time.time;
@@ -202,10 +224,9 @@ public class PlayerController : MonoBehaviour
         if (_Animator == null)
             return;
 
-        _Visuals.flipX = _XDirection < -1;
-
-        _Animator.SetBool("Move", _XDirection != 0);
-        _Animator.speed = _XDirection != 0 ? _XVelocity / _Stats.walkSpeed : 1;
+        _Animator.SetBool("Move", _IsMoving);
+        _Animator.SetBool("Sprint", _IsSprint);
+        _Animator.SetBool("Grounded", _IsGrounded);
     }
 
     void OnJump(bool _val)
@@ -213,8 +234,8 @@ public class PlayerController : MonoBehaviour
         if (_val && _CanJump)
         {
             _YVelocity = _Stats.jumpForce;
-            _JumpCount++;
             _IsJumping = true;
+            _JumpCount++;
         }
     }
 
@@ -226,6 +247,11 @@ public class PlayerController : MonoBehaviour
     void OnSprint(bool _val)
     {
         _IsSprint = _val;
+    }
+
+    void OnCrouch(bool _val)
+    {
+
     }
 
     private void OnDrawGizmos()

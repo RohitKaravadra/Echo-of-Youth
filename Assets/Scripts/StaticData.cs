@@ -39,6 +39,11 @@ public static class GameEvents
         public static Action<GameState> OnGameStateChanged;
     }
 
+    public static class UI
+    {
+        public static Action OnAirControlChanged;
+    }
+
     public static class Camera
     {
 
@@ -52,4 +57,9 @@ public static class GameEvents
         public static Action<bool> OnPlayerSprint;
         public static Action OnUICancel;
     }
+}
+
+public static class Settings
+{
+    public static bool s_AirControlEnabled = false; // **for testing only
 }
