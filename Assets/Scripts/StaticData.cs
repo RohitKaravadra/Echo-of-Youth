@@ -22,8 +22,7 @@ public enum Scenes
 [Serializable]
 public struct PlayerStats
 {
-    public float walkSpeed;
-    public float sprintSpeed;
+    public float speed;
     [Space(5)]
     public float jumpForce;
     [Range(1, 5)] public int maxJumpCount;
@@ -57,9 +56,4 @@ public static class GameEvents
         public static Action<bool> OnPlayerSprint;
         public static Action OnUICancel;
     }
-}
-
-public static class Settings
-{
-    public static bool s_AirControlEnabled = false; // **for testing only
 }

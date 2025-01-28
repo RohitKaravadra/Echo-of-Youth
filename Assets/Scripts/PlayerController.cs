@@ -5,7 +5,6 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField] PlayerStats _Stats;
     [Space(5)]
-    [SerializeField] bool _AirControl;
     [SerializeField] float _CoyoteTime;
     [SerializeField][Range(0.0001f, 0.1f)] float _MoveThreshold;
     [Space(5)]
@@ -58,7 +57,6 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
-        OnAirControlChanged();
         SetData();
 
         // set camera follow target to this object
@@ -67,18 +65,14 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
-        GameEvents.UI.OnAirControlChanged += OnAirControlChanged;   //**for testing only
         GameEvents.Input.OnPlayerMove += OnMove;          // Subscrive to Move Input
         GameEvents.Input.OnPlayerJump += OnJump;          // Subscrive to Jump Input
-        GameEvents.Input.OnPlayerSprint += OnSprint;      // Subscrive to Sprint Input
     }
 
     private void OnDisable()
     {
-        GameEvents.UI.OnAirControlChanged -= OnAirControlChanged;   //**for testing only
         GameEvents.Input.OnPlayerMove -= OnMove;        // Unsubscrive from Move Input
         GameEvents.Input.OnPlayerJump -= OnJump;        // Unsubscrive from Jump Input
-        GameEvents.Input.OnPlayerSprint -= OnSprint;    // Subscrive to Sprint Input
     }
 
     private void Update()
@@ -92,12 +86,6 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         Move(Time.fixedDeltaTime);  // apply movement
-    }
-
-    // **for testing only
-    private void OnAirControlChanged()
-    {
-        _AirControl = Settings.s_AirControlEnabled; // **for testing only
     }
 
     /// <summary>
@@ -152,10 +140,6 @@ public class PlayerController : MonoBehaviour
                 _XVelocity = -_XVelocity * 0.3f;
                 return;
             }
-
-            // return if no air controll allowed
-            if (!_AirControl)
-                return;
         }
 
         // set horizontal velocity
@@ -163,7 +147,7 @@ public class PlayerController : MonoBehaviour
 
         // set speed and acceleration
         float speed, accel;
-        speed = _IsMoving ? (_IsSprint ? _Stats.sprintSpeed : _Stats.walkSpeed) : 0;
+        speed = _IsMoving ? _Stats.speed : 0;
         speed = _XDirection * speed;
         accel = _IsMoving ? _Stats.acceleration : _Stats.deceleration;
 
@@ -225,7 +209,6 @@ public class PlayerController : MonoBehaviour
             return;
 
         _Animator.SetBool("Move", _IsMoving);
-        _Animator.SetBool("Sprint", _IsSprint);
         _Animator.SetBool("Grounded", _IsGrounded);
     }
 
@@ -242,11 +225,6 @@ public class PlayerController : MonoBehaviour
     void OnMove(Vector2 _dir)
     {
         _Direction = _dir; // input direction
-    }
-
-    void OnSprint(bool _val)
-    {
-        _IsSprint = _val;
     }
 
     void OnCrouch(bool _val)
