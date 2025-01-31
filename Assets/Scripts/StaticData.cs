@@ -29,6 +29,8 @@ public struct PlayerStats
     [Space(5)]
     [Range(0, 100)] public float acceleration;
     [Range(0, 100)] public float deceleration;
+    [Space(5)]
+    public float cursorRange;
 }
 
 public static class GameEvents
@@ -54,6 +56,8 @@ public static class GameEvents
         public static Action<Vector2> OnPlayerLook;
         public static Action<bool> OnPlayerJump;
         public static Action<bool> OnPlayerSprint;
+        public static Action<bool> OnObjectSelect;
+        public static Action<bool> OnObjectReverse;
         public static Action OnUICancel;
     }
 }
