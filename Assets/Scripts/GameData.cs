@@ -5,8 +5,8 @@ public class GameData : ScriptableObject
 {
     [SerializeField] PlayerStats[] _PlayerLevelData;
 
-    public PlayerStats GetPlayerData(int level)
-    {
-
-    }
+    //public PlayerStats GetPlayerData(int level)
+    //{
+    //
+    //}
 }

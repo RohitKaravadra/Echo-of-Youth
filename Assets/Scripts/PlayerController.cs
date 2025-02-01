@@ -62,7 +62,7 @@ public class PlayerController : MonoBehaviour
     {
         SetData();
         _Gun.Enabled = _EnableGun;
-        _CharacterCreater.Create();
+        //_CharacterCreater.Create();
 
         // set camera follow target to this object
         CameraManager.Instance.FollowTarget = transform;
