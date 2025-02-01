@@ -48,6 +48,8 @@ public class InputManager : MonoBehaviour
     public void OnMove(InputValue value) => GameEvents.Input.OnPlayerMove?.Invoke(value.Get<Vector2>());
     public void OnJump(InputValue value) => GameEvents.Input.OnPlayerJump?.Invoke(value.isPressed);
     public void OnSprint(InputValue value) => GameEvents.Input.OnPlayerSprint?.Invoke(value.isPressed);
+    public void OnSelect(InputValue value) => GameEvents.Input.OnObjectSelect?.Invoke(value.isPressed);
+    public void OnReverse(InputValue value) => GameEvents.Input.OnObjectReverse?.Invoke(value.isPressed);
 
     //UI Inputs
     public void OnCancel(InputValue value) => GameEvents.Input.OnUICancel?.Invoke();
