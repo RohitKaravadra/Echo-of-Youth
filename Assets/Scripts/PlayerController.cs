@@ -4,6 +4,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] PlayerStats _Stats;
+    [SerializeField] bool _EnableGun;
     [Space(5)]
     [SerializeField] float _CoyoteTime;
     [SerializeField][Range(0.0001f, 0.1f)] float _MoveThreshold;
@@ -24,6 +25,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] CapsuleCollider2D _Collider;
     [SerializeField] Animator _Animator;
     [SerializeField] Transform _Visuals;
+    [SerializeField] ReverseGun _Gun;
+    [SerializeField] CharacterCreater characterCreater;
 
     // Input variables
     Vector2 _MoveInput;
@@ -57,6 +60,7 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         SetData();
+        _Gun.Enabled = _EnableGun;
 
         // set camera follow target to this object
         CameraManager.Instance.FollowTarget = transform;
@@ -242,6 +246,16 @@ public class PlayerController : MonoBehaviour
             Gizmos.DrawRay(_Collider.transform.position + Vector3.down * hBody, Vector2.down * _GroundDistance);
             Gizmos.DrawRay(_Collider.transform.position + (_Collider.size.x * _XDirection * Vector3.right / 2),
                 _WallDistance * _XDirection * Vector2.right);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        print("True");
+        if (collision.CompareTag("Gun") && !_Gun.Enabled)
+        {
+            _Gun.Enabled = true;
+            Destroy(collision.gameObject);
         }
     }
 }

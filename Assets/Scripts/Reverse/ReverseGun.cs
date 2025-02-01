@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ReverseGun : MonoBehaviour
@@ -12,9 +11,13 @@ public class ReverseGun : MonoBehaviour
 
     Vector2 _CursorPos = Vector2.zero;
 
-    private void Awake()
+    public bool Enabled
     {
-
+        get => gameObject.activeSelf; set
+        {
+            gameObject.SetActive(value);
+            if (Crosshair.Instance != null) Crosshair.Instance.Enable = value;
+        }
     }
 
     private void OnEnable()
@@ -29,6 +32,13 @@ public class ReverseGun : MonoBehaviour
         GameEvents.Input.OnObjectSelect -= OnSelected;
         GameEvents.Input.OnObjectReverse -= OnReverse;
         OnObjectHover -= ObjectHover;
+        if (Crosshair.Instance != null)
+            Crosshair.Instance.Enable = false;
+    }
+
+    private void Start()
+    {
+        Crosshair.Instance.enabled = Enabled;
     }
 
     private void Update()

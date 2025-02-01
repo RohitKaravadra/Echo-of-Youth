@@ -1,6 +1,5 @@
 using UnityEngine;
 using System;
-using JetBrains.Annotations;
 
 [Serializable]
 public enum GameState
@@ -19,9 +18,34 @@ public enum Scenes
     Level = 1
 }
 
+public enum BodyPart
+{
+    Head,
+    Torso,
+    Hand_L,
+    Hand_R,
+    Leg_R,
+    Leg_L
+}
+
+[Serializable]
+public struct PlayerSprites
+{
+    public BodyPart part;
+    public Sprite sprite;
+}
+
+[Serializable]
+public struct PlayerSpriteRenderers
+{
+    public BodyPart part;
+    public Sprite sprite;
+}
+
 [Serializable]
 public struct PlayerStats
 {
+    public string name;
     public float speed;
     [Space(5)]
     public float jumpForce;
@@ -30,7 +54,7 @@ public struct PlayerStats
     [Range(0, 100)] public float acceleration;
     [Range(0, 100)] public float deceleration;
     [Space(5)]
-    public float cursorRange;
+    public PlayerSprites[] sprite;
 }
 
 public static class GameEvents

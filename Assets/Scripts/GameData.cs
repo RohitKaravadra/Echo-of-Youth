@@ -4,7 +4,4 @@ using UnityEngine;
 public class GameData : ScriptableObject
 {
     [SerializeField] PlayerStats[] _PlayerLevelData;
-    [Space(10)]
-    [SerializeField] float _MaxReverseHistory;
-    [SerializeField] float _MinRecordDistance;
 }
