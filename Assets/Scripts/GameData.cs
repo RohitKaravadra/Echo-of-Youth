@@ -4,4 +4,9 @@ using UnityEngine;
 public class GameData : ScriptableObject
 {
     [SerializeField] PlayerStats[] _PlayerLevelData;
+
+    public PlayerStats GetPlayerData(int level)
+    {
+
+    }
 }

@@ -26,7 +26,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Animator _Animator;
     [SerializeField] Transform _Visuals;
     [SerializeField] ReverseGun _Gun;
-    [SerializeField] CharacterCreater characterCreater;
+    [SerializeField] GameData _GameData;
+    [SerializeField] CharacterCreater _CharacterCreater;
 
     // Input variables
     Vector2 _MoveInput;
@@ -61,6 +62,7 @@ public class PlayerController : MonoBehaviour
     {
         SetData();
         _Gun.Enabled = _EnableGun;
+        _CharacterCreater.Create();
 
         // set camera follow target to this object
         CameraManager.Instance.FollowTarget = transform;
