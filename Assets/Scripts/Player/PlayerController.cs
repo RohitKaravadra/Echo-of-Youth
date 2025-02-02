@@ -3,9 +3,12 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] PlayerStats _Stats;
+    [Header("For Testing")]
     [SerializeField] bool _EnableGun;
-    [Space(5)]
+    [SerializeField] bool _OverrideCharacter;
+    [SerializeField] Character _Character;
+    [SerializeField] PlayerStats _Stats;
+    [Space(10)]
     [SerializeField] float _CoyoteTime;
     [SerializeField][Range(0.0001f, 0.1f)] float _MoveThreshold;
     [Space(5)]
@@ -118,15 +121,19 @@ public class PlayerController : MonoBehaviour
         _SlideData.SetLayerMask(_GroundLayers);
         _SlideData.useSimulationMove = true;
 
-        // set player stats and create character visuals
-        _Stats = GameManager.CurrentScene switch
-        {
-            Scenes.MainMenu => _PlayerData.Get(Character.Grandpa),
-            Scenes.Level1 => _PlayerData.Get(Character.Grandpa),
-            Scenes.Level2 => _PlayerData.Get(Character.Daddy),
-            Scenes.Level3 => _PlayerData.Get(Character.Kid),
-            _ => throw new System.NotImplementedException()
-        };
+        if (_OverrideCharacter)
+            _Stats = _PlayerData.Get(_Character);
+        else
+            // set player stats and create character visuals
+            _Stats = GameManager.CurrentScene switch
+            {
+                Scenes.MainMenu => _PlayerData.Get(Character.Grandpa),
+                Scenes.Level1 => _PlayerData.Get(Character.Grandpa),
+                Scenes.Level2 => _PlayerData.Get(Character.Daddy),
+                Scenes.Level3 => _PlayerData.Get(Character.Kid),
+                _ => throw new System.NotImplementedException()
+            };
+
         _CharacterCreater.Create(_Stats.sprites);
 
         _Visuals.localScale = Vector3.one * _Stats.scale;
