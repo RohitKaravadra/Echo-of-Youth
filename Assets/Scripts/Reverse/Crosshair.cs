@@ -17,10 +17,17 @@ public class Crosshair : MonoBehaviour
     public Vector2 WorldPos => _MainCam.ScreenToWorldPoint(transform.position);
     public Vector2 LocalPos => _CursorDelta;
 
-    public static Crosshair Instance { get; private set; }
+    public static Crosshair Instance { get; private set; } // singleton Instance
     private void Awake()
     {
-        Instance = this;
+        // Singleton implementation
+        if (Instance == null)
+            Instance = this;
+        else
+        {
+            Debug.LogWarning("Instance of " + this.name + " already exists \n deleting this instance");
+            Destroy(this);
+        }
 
         _MainCam = Camera.main;
         _Animator = GetComponent<Animator>();
@@ -36,6 +43,12 @@ public class Crosshair : MonoBehaviour
         _CurserRange = Screen.height / 200f * _Range;
         _ScreenCenter = new Vector2(Screen.width, Screen.height) / 2;
     }
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
     private void UpdateSensi(float value) => _Sensi = value;
 
     private Vector2 ClampValues(Vector2 value) => Vector2.ClampMagnitude(value, _CurserRange);

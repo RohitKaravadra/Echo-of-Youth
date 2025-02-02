@@ -9,18 +9,15 @@ public class UIManager : MonoBehaviour
 
     private void OnEnable()
     {
-        GameEvents.Game.OnGameStateChanged += OnGameStateChange;
+        GameEvents.Game.OnGamePause += PauseGame;
     }
 
     private void OnDisable()
     {
-        GameEvents.Game.OnGameStateChanged -= OnGameStateChange;
+        GameEvents.Game.OnGamePause -= PauseGame;
     }
 
-    private void OnGameStateChange(GameState _state)
-    {
-        _PausePanel.SetActive(_state == GameState.Pause);
-    }
+    private void PauseGame(bool pause) => _PausePanel.SetActive(pause);
 
     public void OnResumeButton()
     {

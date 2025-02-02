@@ -2,20 +2,18 @@ using UnityEngine;
 using System;
 
 [Serializable]
-public enum GameState
+public enum TriggerEvents
 {
-    None,
-    Start,
-    Play,
-    Pause,
-    Over
+    GameOver
 }
 
 [Serializable]
 public enum Scenes
 {
     MainMenu = 0,
-    Level = 1
+    Level1 = 1,
+    Level2 = 2,
+    Level3 = 3
 }
 
 public enum BodyPart
@@ -26,6 +24,12 @@ public enum BodyPart
     Hand_R,
     Leg_R,
     Leg_L
+}
+public enum Character
+{
+    Kid,
+    Daddy,
+    Grandpa
 }
 
 [Serializable]
@@ -39,13 +43,14 @@ public struct PlayerSprites
 public struct PlayerSpriteRenderers
 {
     public BodyPart part;
-    public Sprite sprite;
+    public SpriteRenderer renderer;
 }
 
 [Serializable]
 public struct PlayerStats
 {
-    public string name;
+    public Character type;
+    [Range(0, 1)] public float scale;
     public float speed;
     [Space(5)]
     public float jumpForce;
@@ -54,19 +59,15 @@ public struct PlayerStats
     [Range(0, 100)] public float acceleration;
     [Range(0, 100)] public float deceleration;
     [Space(5)]
-    public PlayerSprites[] sprite;
+    public PlayerSprites[] sprites;
 }
 
 public static class GameEvents
 {
     public static class Game
     {
-        public static Action<GameState> OnGameStateChanged;
-    }
-
-    public static class UI
-    {
-        public static Action OnAirControlChanged;
+        public static Action<bool> OnGamePause;
+        public static Action OnLevelOver;
     }
 
     public static class Camera
@@ -83,5 +84,7 @@ public static class GameEvents
         public static Action<bool> OnObjectSelect;
         public static Action<bool> OnObjectReverse;
         public static Action OnUICancel;
+
+        public static Action<bool> OnSetInputState;
     }
 }

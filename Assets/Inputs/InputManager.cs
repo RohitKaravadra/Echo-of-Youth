@@ -23,17 +23,12 @@ public class InputManager : MonoBehaviour
 
     private void OnEnable()
     {
-        GameEvents.Game.OnGameStateChanged += OnGameStateChange;
+        GameEvents.Input.OnSetInputState += SetInput;
     }
 
     private void OnDisable()
     {
-        GameEvents.Game.OnGameStateChanged -= OnGameStateChange;
-    }
-
-    private void OnGameStateChange(GameState _state)
-    {
-        SetInput(_state == GameState.Play || _state == GameState.Start);
+        GameEvents.Input.OnSetInputState -= SetInput;
     }
 
     public void SetInput(bool status)

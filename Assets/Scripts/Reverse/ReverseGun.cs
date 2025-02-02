@@ -6,6 +6,7 @@ public class ReverseGun : MonoBehaviour
     [SerializeField] float _MinGunPullDistance;
     [SerializeField] Transform _GunHead;
     [SerializeField] Laser _Laser;
+    [SerializeField] ShakeData _CameraShake;
 
     public static Action<Transform, bool> OnObjectHover;
 
@@ -61,6 +62,7 @@ public class ReverseGun : MonoBehaviour
     {
         if (_Laser.Enabled)
         {
+            CameraManager.Instance?.ApplyShake(_CameraShake);
             Vector2 pos = transform.position;
             Vector2 diff = _CursorPos - pos;
 

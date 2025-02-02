@@ -410,11 +410,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _MaxReverseSteps: 100
-  _MinSnapshotDistance: 0.5
-  _ReverseSpeed: 1
+  _SnapshotThreshold: 0.2
+  _TrailThreshold: 1
+  _ReverseSpeed: 0.5
   _Visuals: {fileID: 2708015784987315739}
   _OutlineObject: {fileID: 483603377000887268}
-  _Trail: {fileID: 6298787356780087220}
+  _TrailRenderer: {fileID: 6298787356780087220}
 --- !u!114 &399509592103516860
 MonoBehaviour:
   m_ObjectHideFlags: 0

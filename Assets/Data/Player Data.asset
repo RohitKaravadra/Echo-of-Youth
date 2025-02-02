@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f7fa3c236b2b9b42bf0913993416a8f, type: 3}
+  m_Name: Player Data
+  m_EditorClassIdentifier: 
+  _PlayerLevelData:
+  - type: 2
+    scale: 1
+    speed: 3
+    jumpForce: 5.5
+    maxJumpCount: 1
+    acceleration: 19
+    deceleration: 14
+    sprites:
+    - part: 0
+      sprite: {fileID: 21300000, guid: 0f796ae0cde035346b3a1414766cdf6f, type: 3}
+    - part: 1
+      sprite: {fileID: 21300000, guid: df21d8df0f56903449d96321da61943e, type: 3}
+    - part: 3
+      sprite: {fileID: 21300000, guid: eb5c5bb3667ff15409dbc963547227b9, type: 3}
+    - part: 2
+      sprite: {fileID: 21300000, guid: e3ca30a357c337044bb9325adb93f4e6, type: 3}
+    - part: 5
+      sprite: {fileID: 21300000, guid: e2853067db9fe5344ae345a8b6eeeb5c, type: 3}
+    - part: 5
+      sprite: {fileID: 21300000, guid: 2c1d2272353bba44cbcaebcf1aad0714, type: 3}
+  - type: 1
+    scale: 1
+    speed: 4
+    jumpForce: 5
+    maxJumpCount: 2
+    acceleration: 19
+    deceleration: 14
+    sprites:
+    - part: 0
+      sprite: {fileID: 21300000, guid: f808982fbd5d7894183ebc12b879fb18, type: 3}
+    - part: 1
+      sprite: {fileID: 21300000, guid: 1ecff9b891d735344bae3315d8f135de, type: 3}
+    - part: 2
+      sprite: {fileID: 21300000, guid: d99cedf53dd96c64ebadf7580ed843d5, type: 3}
+    - part: 3
+      sprite: {fileID: 21300000, guid: 52473d3c822c42e4ba3ac53a64f4731e, type: 3}
+    - part: 4
+      sprite: {fileID: 21300000, guid: 6079845b7f2106f43ac2f6d0fee86696, type: 3}
+    - part: 5
+      sprite: {fileID: 21300000, guid: 0b3afd8afcdbd0c47aa60deff05f9df8, type: 3}
+  - type: 0
+    scale: 0.8
+    speed: 5
+    jumpForce: 6
+    maxJumpCount: 2
+    acceleration: 19
+    deceleration: 14
+    sprites:
+    - part: 0
+      sprite: {fileID: 21300000, guid: 2d256b8e498c2de4c9db98fc95dd1d8f, type: 3}
+    - part: 1
+      sprite: {fileID: 21300000, guid: a56b7d6dd8e1ca942a1a3423121aed3f, type: 3}
+    - part: 2
+      sprite: {fileID: 21300000, guid: e1027099098841245a790acff77f2665, type: 3}
+    - part: 3
+      sprite: {fileID: 21300000, guid: e5ad0240388d5c34fa4e0fb936579bd4, type: 3}
+    - part: 4
+      sprite: {fileID: 21300000, guid: 5e6b8776c7c4f1f4e86f2e7e911d0083, type: 3}
+    - part: 5
+      sprite: {fileID: 21300000, guid: 58f3ce329b768e747b1976a637020f97, type: 3}
