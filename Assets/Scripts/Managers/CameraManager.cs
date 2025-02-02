@@ -19,7 +19,6 @@ public class CameraManager : MonoBehaviour
     [SerializeField] AnimationCurve _FrequencyCurve;
 
     public Transform FollowTarget { get => _FollowCamera.Follow; set { _FollowCamera.Follow = value; } }
-    public static CameraManager Instance { get; private set; }  // Singleton Instance
 
     private ShakeData _ShakeData;
     private float _CurTime;
@@ -27,6 +26,7 @@ public class CameraManager : MonoBehaviour
 
     private CinemachineBasicMultiChannelPerlin _Noise;
 
+    public static CameraManager Instance { get; private set; }  // Singleton Instance
     private void Awake()
     {
         // Singleton implementation

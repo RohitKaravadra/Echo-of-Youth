@@ -16,6 +16,7 @@ public class ReverseGun : MonoBehaviour
     IReversible _SelectedObject = null;
 
     Vector2 _CursorPos = Vector2.zero;
+    bool _TooClose = false;
 
     public bool Enabled
     {
@@ -52,6 +53,8 @@ public class ReverseGun : MonoBehaviour
     private void Update()
     {
         _CursorPos = Crosshair.Instance.WorldPos;
+        _TooClose = Vector2.Distance(transform.position, _CursorPos) < 0.2f;
+
         SetRotation();
         CheckDrag();
     }
@@ -63,8 +66,15 @@ public class ReverseGun : MonoBehaviour
         if (_Laser.Enabled)
         {
             CameraManager.Instance?.ApplyShake(_CameraShake);
+
             Vector2 pos = transform.position;
             Vector2 diff = _CursorPos - pos;
+
+            if (_TooClose)
+            {
+                _Laser.Set(_GunHead.position, transform.position + transform.up * _MinGunPullDistance);
+                return;
+            }
 
             pos = diff.magnitude < _MinGunPullDistance ?
                  pos + diff.normalized * _MinGunPullDistance : _CursorPos;
@@ -81,6 +91,9 @@ public class ReverseGun : MonoBehaviour
 
     private void SetRotation()
     {
+        if (_TooClose)
+            return;
+
         transform.localScale = new Vector3(transform.position.x < _CursorPos.x ? 1 : -1, 1, 1);
         transform.up = (_CursorPos - (Vector2)transform.position).normalized;
     }
@@ -123,12 +136,14 @@ public class ReverseGun : MonoBehaviour
                 _SelectedObject = _HoveringObject;
                 _SelectedObject.OnSelect(true);
             }
+            AudioManager.Instance?.PlayLaser();
         }
         else
         {
             _SelectedObject?.OnSelect(false);
             _SelectedObject = null;
             _HoveringObject?.OnHover(true, _Selected);
+            AudioManager.Instance?.StopLaser();
         }
 
         _Laser.Enabled = state;
@@ -140,6 +155,7 @@ public class ReverseGun : MonoBehaviour
         {
             if (_HoveringObject.OnReverse())
             {
+                AudioManager.Instance?.PlaySound(AudioFile.Reverse);
                 _SelectedObject = null;
                 _HoveringObject = null;
             }
