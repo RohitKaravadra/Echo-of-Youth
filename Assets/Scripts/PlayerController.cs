@@ -1,4 +1,5 @@
 
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -72,14 +73,12 @@ public class PlayerController : MonoBehaviour
     {
         GameEvents.Input.OnPlayerMove += OnMove;        // Subscribe to Move Input
         GameEvents.Input.OnPlayerJump += OnJump;        // Subscribe to Jump Input
-        GameEvents.Input.OnPlayerLook += OnLook;        // Subscribe to look Input
     }
 
     private void OnDisable()
     {
         GameEvents.Input.OnPlayerMove -= OnMove;        // Unsubscribe from Move Input
         GameEvents.Input.OnPlayerJump -= OnJump;        // Unsubscribe from Jump Input
-        GameEvents.Input.OnPlayerLook -= OnLook;        // Unsubscribe to look Input
     }
 
     private void Update()
@@ -221,20 +220,10 @@ public class PlayerController : MonoBehaviour
 
     void OnJump(bool _val)
     {
-        if (_val)
-            SetJump();
+        if (_val) SetJump();
     }
 
-    void OnMove(Vector2 _dir)
-    {
-        _MoveInput = _dir; // input direction
-    }
-
-    void OnLook(Vector2 _delta)
-    {
-        Crosshair.Instance?.OnLook(_delta);
-
-    }
+    void OnMove(Vector2 _dir) => _MoveInput = _dir; // input direction
 
     private void OnDrawGizmos()
     {
@@ -253,10 +242,10 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        print("True");
-        if (collision.CompareTag("Gun") && !_Gun.Enabled)
+        if (collision.CompareTag("Gun"))
         {
-            _Gun.Enabled = true;
+            if (!_Gun.Enabled)
+                _Gun.Enabled = true;
             Destroy(collision.gameObject);
         }
     }

@@ -7,7 +7,7 @@ public class OutlineEffect : MonoBehaviour
     [SerializeField] Color _Color;
 
     GameObject _OutlineObject;
-    public bool EnableOutline { get => _OutlineObject.activeSelf; set { _OutlineObject.SetActive(value); } }
+    public bool Enabled { get => _OutlineObject.activeSelf; set { _OutlineObject.SetActive(value); } }
 
     public void Set(GameObject outlineObject, SpriteRenderer mySR)
     {
@@ -21,6 +21,6 @@ public class OutlineEffect : MonoBehaviour
         _OutlineObject = outlineObject;
         _OutlineObject.transform.localScale = Vector3.one * (_Tickness + 1);
 
-        EnableOutline = false;
+        Enabled = false;
     }
 }

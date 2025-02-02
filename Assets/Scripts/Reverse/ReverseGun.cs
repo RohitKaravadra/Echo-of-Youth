@@ -4,10 +4,15 @@ using UnityEngine;
 public class ReverseGun : MonoBehaviour
 {
     [SerializeField] float _MinGunPullDistance;
+    [SerializeField] Transform _GunHead;
+    [SerializeField] Laser _Laser;
+
     public static Action<Transform, bool> OnObjectHover;
 
-    IReversible _Hovering = null;
-    IReversible _Selected = null;
+    bool _Selected = false;
+
+    IReversible _HoveringObject = null;
+    IReversible _SelectedObject = null;
 
     Vector2 _CursorPos = Vector2.zero;
 
@@ -16,7 +21,9 @@ public class ReverseGun : MonoBehaviour
         get => gameObject.activeSelf; set
         {
             gameObject.SetActive(value);
-            if (Crosshair.Instance != null) Crosshair.Instance.Enable = value;
+            if (Crosshair.Instance != null)
+                Crosshair.Instance.Enabled = value;
+            _Laser.Enabled = false;
         }
     }
 
@@ -24,6 +31,7 @@ public class ReverseGun : MonoBehaviour
     {
         GameEvents.Input.OnObjectSelect += OnSelected;
         GameEvents.Input.OnObjectReverse += OnReverse;
+        GameEvents.Input.OnPlayerLook += OnLook;
         OnObjectHover += ObjectHover;
     }
 
@@ -31,9 +39,8 @@ public class ReverseGun : MonoBehaviour
     {
         GameEvents.Input.OnObjectSelect -= OnSelected;
         GameEvents.Input.OnObjectReverse -= OnReverse;
+        GameEvents.Input.OnPlayerLook -= OnLook;
         OnObjectHover -= ObjectHover;
-        if (Crosshair.Instance != null)
-            Crosshair.Instance.Enable = false;
     }
 
     private void Start()
@@ -48,15 +55,26 @@ public class ReverseGun : MonoBehaviour
         CheckDrag();
     }
 
+    private void OnLook(Vector2 val) => Crosshair.Instance?.OnLook(val);
+
     private void CheckDrag()
     {
-        Vector2 pos = transform.position;
-        Vector2 diff = _CursorPos - pos;
+        if (_Laser.Enabled)
+        {
+            Vector2 pos = transform.position;
+            Vector2 diff = _CursorPos - pos;
 
-        pos = diff.magnitude < _MinGunPullDistance ?
-             pos + diff.normalized * _MinGunPullDistance : _CursorPos;
+            pos = diff.magnitude < _MinGunPullDistance ?
+                 pos + diff.normalized * _MinGunPullDistance : _CursorPos;
 
-        _Selected?.OnMove(pos);
+            if (_SelectedObject != null)
+            {
+                _Laser.Set(_GunHead.position, _SelectedObject.Position);
+                _SelectedObject.OnMove(pos);
+            }
+            else
+                _Laser.Set(_GunHead.position, pos);
+        }
     }
 
     private void SetRotation()
@@ -67,57 +85,61 @@ public class ReverseGun : MonoBehaviour
 
     private void ObjectHover(Transform obj, bool state)
     {
-        if (_Selected != null)
-            return;
-
         if (state)
         {
-            _Hovering?.OnHover(false);
+            if (obj.TryGetComponent<IReversible>(out IReversible newHover))
+            {
+                _HoveringObject?.OnHover(false);
+                _HoveringObject = newHover;
+                _HoveringObject.OnHover(state, _Selected);
 
-            if (obj.TryGetComponent<IReversible>(out _Hovering))
-                _Hovering.OnHover(state);
-            else
-                _Hovering = null;
+                if (_Selected && _SelectedObject == null)
+                {
+                    _SelectedObject = _HoveringObject;
+                    _SelectedObject.OnSelect(true);
+                }
+            }
         }
         else
         {
-            if (_Hovering != null && _Hovering.Compare(obj))
+            if (_HoveringObject != null && _HoveringObject.Compare(obj))
             {
-                _Hovering.OnHover(false);
-                _Hovering = null;
+                _HoveringObject.OnHover(false);
+                _HoveringObject = null;
             }
         }
     }
 
     private void OnSelected(bool state)
     {
+        _Selected = state;
+
         if (state)
         {
-            if (_Selected == null && _Hovering != null)
+            if (_SelectedObject == null && _HoveringObject != null)
             {
-                _Selected = _Hovering;
-                _Selected.OnSelect(true);
+                _SelectedObject = _HoveringObject;
+                _SelectedObject.OnSelect(true);
             }
         }
         else
         {
-            if (_Selected != null)
-            {
-                _Selected.OnSelect(false);
-                _Selected = null;
-            }
+            _SelectedObject?.OnSelect(false);
+            _SelectedObject = null;
+            _HoveringObject?.OnHover(true, _Selected);
         }
-    }
 
+        _Laser.Enabled = state;
+    }
 
     private void OnReverse(bool state)
     {
-        if (state && _Hovering != null)
+        if (state && _HoveringObject != null)
         {
-            if (_Hovering.OnReverse())
+            if (_HoveringObject.OnReverse())
             {
-                _Selected = null;
-                _Hovering = null;
+                _SelectedObject = null;
+                _HoveringObject = null;
             }
         }
     }

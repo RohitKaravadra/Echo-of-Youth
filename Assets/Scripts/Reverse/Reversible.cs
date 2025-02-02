@@ -1,18 +1,24 @@
 
 using System.Collections;
+using System.Net.NetworkInformation;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class Reversible : MonoBehaviour, IReversible
 {
-    [SerializeField] int _MaxReverseSteps;
-    [SerializeField] float _MinSnapshotDistance;
+    [SerializeField] int _MaxReverseSteps = 100;
+    [SerializeField] float _MinSnapshotDistance = 0.2f;
+    [SerializeField] float _ReverseSpeed = 1;
     [Space(10)]
     [SerializeField] SpriteRenderer _Visuals;
     [SerializeField] GameObject _OutlineObject;
+    [SerializeField] LineRenderer _Trail;
 
     Rigidbody2D _Rb;
     OutlineEffect _Outline;
+    bool _IsReversing = false;
+
+    public Vector2 Position => transform.position;
 
     struct Snapshot
     {
@@ -27,7 +33,7 @@ public class Reversible : MonoBehaviour, IReversible
         }
     }
 
-    CircularQueue<Snapshot> _ReverseData;
+    CircularQueue<Snapshot> _History;
     float _LastTime;
 
     bool _Selected;
@@ -43,7 +49,13 @@ public class Reversible : MonoBehaviour, IReversible
 
     private void Start()
     {
-        _ReverseData = new(_MaxReverseSteps);
+        _History = new(_MaxReverseSteps);
+    }
+
+    private void Update()
+    {
+        if (_Trail.enabled || _IsReversing)
+            SetTrail();
     }
 
     private void OnDestroy()
@@ -51,13 +63,31 @@ public class Reversible : MonoBehaviour, IReversible
         StopAllCoroutines();
     }
 
-    private void SetOutline() => _Outline.EnableOutline = _Hover || _Selected;
+    private void SetTrail(bool reverse = false)
+    {
+        _Trail.positionCount = _History.Size;
+        if (_History.Size == 0)
+            return;
+
+        Vector3[] pos = new Vector3[_History.Size];
+
+        for (int i = 0; i < _History.Size; i++)
+            pos[reverse ? _History.Size - i - 1 : i] = _History[i].pos;
+
+        _Trail.SetPositions(pos);
+    }
+
+    private void SetOutline()
+    {
+        _Outline.Enabled = _Hover || _Selected;
+        _Trail.enabled = _Outline.Enabled || _IsReversing;
+    }
 
     public bool Compare(Transform other) => transform.Equals(other);
 
-    public void OnHover(bool state)
+    public void OnHover(bool state, bool selected)
     {
-        _Hover = state;
+        _Hover = state && !selected;
         SetOutline();
     }
 
@@ -68,7 +98,7 @@ public class Reversible : MonoBehaviour, IReversible
 
         if (_Selected)
         {
-            _ReverseData.Clear();
+            _History.Clear();
             _LastTime = Time.time;
         }
     }
@@ -77,18 +107,18 @@ public class Reversible : MonoBehaviour, IReversible
     {
         _Rb.MovePosition(Vector2.Lerp(_Rb.position, position, 0.3f));
 
-        if (_ReverseData.Size == 0 || (_ReverseData.Last.pos - _Rb.position).magnitude > _MinSnapshotDistance)
+        if (_History.Size == 0 || (_History.Last.pos - _Rb.position).magnitude > _MinSnapshotDistance)
         {
-            _ReverseData.Enqueue(new Snapshot(transform.position, transform.rotation, Time.time - _LastTime));
+            _History.Enqueue(new Snapshot(transform.position, transform.rotation, Time.time - _LastTime));
             _LastTime = Time.time;
         }
 
-        return _ReverseData.Size / _ReverseData.Capacity;
+        return _History.Size / _History.Capacity;
     }
 
     public bool OnReverse()
     {
-        if (_ReverseData.Size == 0)
+        if (_History.Size == 0)
             return false;
 
         _Selected = false;
@@ -101,24 +131,24 @@ public class Reversible : MonoBehaviour, IReversible
 
     IEnumerator Reverse()
     {
-        if (_ReverseData.Size <= 0)
+        if (_History.Size <= 0)
             yield break;
 
-        _ReverseData.Reverse();
+        _History.Reverse();
 
+        _IsReversing = true;
         _Rb.simulated = false;
 
         Snapshot data = new();
         float delta;
 
-        while (_ReverseData.Size > 0)
+        while (_History.Size > 0)
         {
-            data = _ReverseData.Dequeue();
+            data = _History.Dequeue();
 
             while (((Vector2)transform.position - data.pos).magnitude > 0.2f)
             {
                 delta = Time.deltaTime / data.time;
-
                 Vector2 pos = Vector2.Lerp(transform.position, data.pos, delta);
                 Quaternion rot = Quaternion.Lerp(transform.rotation, data.rot, delta);
 
@@ -130,6 +160,7 @@ public class Reversible : MonoBehaviour, IReversible
             yield return 0;
         }
 
+        _IsReversing = false;
         _Rb.simulated = true;
     }
 
