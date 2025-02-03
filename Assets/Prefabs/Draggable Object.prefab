@@ -298,9 +298,7 @@ LineRenderer:
   m_SortingLayerID: -915834863
   m_SortingLayer: 2
   m_SortingOrder: 0
-  m_Positions:
-  - {x: 0, y: 0, z: 0}
-  - {x: 4.2334547, y: -0.27187353, z: 0.895061}
+  m_Positions: []
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -393,8 +391,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 919823530626564374}
-  - {fileID: 1179003213682822049}
   - {fileID: 7358088192707325770}
+  - {fileID: 1179003213682822049}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2389706235705953187
@@ -443,8 +441,8 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_LinearDamping: 0.2
+  m_AngularDamping: 0.2
   m_GravityScale: 1
   m_Material: {fileID: 6200000, guid: ea8dce7da26968747916368c498fd021, type: 2}
   m_IncludeLayers:

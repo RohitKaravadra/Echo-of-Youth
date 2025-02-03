@@ -1,10 +1,12 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Crosshair : MonoBehaviour
 {
     [SerializeField, Range(1, 100)] int _Range;
-    [SerializeField, Range(0.1f, 1)] float _Sensi = 10;
+    [SerializeField, Range(0.1f, 2)] float _Sensi = 1;
     [SerializeField] Transform _CrosshairObject;
+    [SerializeField] Slider _SensiSlider;
 
     private Camera _MainCam;
     private Animator _Animator;
@@ -33,7 +35,16 @@ public class Crosshair : MonoBehaviour
         _Animator = GetComponent<Animator>();
 
         _CursorDelta = Vector2.zero;
+
+        _Sensi = PlayerPrefs.GetFloat("Sensi", 0.7f);
+        _SensiSlider.value = _Sensi * 100;
+
         SetBoundsData();
+        _SensiSlider.onValueChanged.AddListener((val) =>
+        {
+            _Sensi = val / 100;
+            PlayerPrefs.SetFloat("Sensi", _Sensi);
+        });
     }
 
     private void Start() => OnLook(Vector2.zero);

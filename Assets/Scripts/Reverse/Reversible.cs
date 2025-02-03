@@ -80,8 +80,8 @@ public class Reversible : MonoBehaviour, IReversible
 
     private void SetOutline()
     {
-        _Outline.Enabled = _Hover || _Selected;
-        _TrailRenderer.enabled = _Outline.Enabled || _IsReversing;
+        _Outline.Enabled = _Hover || _Selected || _IsReversing;
+        _TrailRenderer.enabled = _Hover || _Selected;
     }
 
     public bool Compare(Transform other) => transform.Equals(other);
@@ -139,7 +139,7 @@ public class Reversible : MonoBehaviour, IReversible
         _History.Reverse();
 
         _IsReversing = true;
-        _TrailRenderer.enabled = true;
+        SetOutline();
         _Rb.simulated = false;
 
         Snapshot data = new();
@@ -166,6 +166,7 @@ public class Reversible : MonoBehaviour, IReversible
 
         _TrailRenderer.enabled = false;
         _IsReversing = false;
+        SetOutline();
         _Rb.simulated = true;
     }
 

@@ -164,14 +164,20 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // set speed, direction and acceleration
+        // udate direction
         _XDirection = _IsMoving ? (_MoveInput.x > 0 ? 1 : -1) : _XDirection;
-        float speed = (_IsMoving ? _Stats.speed : 0) * _XDirection;
+
+        // check for air controll
+        float control = _XDirection * (_IsMoving && !_IsGrounded ? _Stats.airControl : 1);
+
+        // update speed and acceleration
+        float speed = (_IsMoving ? _Stats.speed : 0) * control;
         float accel = _IsMoving ? _Stats.acceleration : _Stats.deceleration;
 
         // set velocity
         _Velocity.x = Mathf.Abs(_Velocity.x - speed) > _MoveThreshold ?
-            Mathf.Lerp(_Velocity.x, speed, deltaTime * accel) : speed;
+            Mathf.Lerp(_Velocity.x, speed, deltaTime * accel)
+            : speed;
 
         // swap visuals if needed
         if (_Velocity.x != 0)
@@ -215,6 +221,7 @@ public class PlayerController : MonoBehaviour
         _Velocity.y = _Stats.jumpForce;
         _IsJumping = true;
         _JumpCount++;
+        AudioManager.Instance?.PlaySound(AudioFile.Jump);
     }
 
     void CheckCollision()
