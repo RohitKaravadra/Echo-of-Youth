@@ -16,6 +16,7 @@ public struct DialoguePanel
     public GameObject panel;
     public float delay;
     public float time;
+    public bool disableInput;
 }
 
 public class DialogueSystem : MonoBehaviour
@@ -55,7 +56,7 @@ public class DialogueSystem : MonoBehaviour
         {
             _Current.panel.SetActive(false);
             _Current = _Null;
-            if (InputManager.Instance != null)
+            if (_Current.disableInput && InputManager.Instance != null)
                 InputManager.Instance.SetInput(true);
         }
     }

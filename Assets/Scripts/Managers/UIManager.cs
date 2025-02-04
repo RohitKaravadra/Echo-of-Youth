@@ -65,10 +65,7 @@ public class UIManager : MonoBehaviour
 
     private void PauseGame(bool pause) => _PausePanel.SetActive(pause);
 
-    public void OnResumeButton()
-    {
-        GameEvents.Input.OnUICancel.Invoke();
-    }
+    public void OnResumeButton() => GameEvents.Input.OnUICancel.Invoke();
 
     public void OnExitButton()
     {

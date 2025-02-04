@@ -333,4 +333,10 @@ public class PlayerController : MonoBehaviour
             Destroy(collision.gameObject);
         }
     }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.transform.CompareTag("Danger") && _IsAlive)
+            OnDeath();
+    }
 }

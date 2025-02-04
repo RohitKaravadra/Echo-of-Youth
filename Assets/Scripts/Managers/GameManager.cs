@@ -22,6 +22,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        Time.timeScale = 1.0f;
         GameEvents.Input.OnSetInputState?.Invoke(!_Pause);
     }
 
@@ -46,6 +47,7 @@ public class GameManager : MonoBehaviour
     private void OnUICancel()
     {
         _Pause = !_Pause;
+        Time.timeScale = _Pause ? 0.0f : 1.0f;
         GameEvents.Input.OnSetInputState?.Invoke(!_Pause);
         GameEvents.Game.OnGamePause?.Invoke(_Pause);
     }
