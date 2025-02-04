@@ -1,7 +1,7 @@
 
 using UnityEngine;
 
-public class MovingObject : MonoBehaviour, IInteractable
+public class LoopingObject : MonoBehaviour, IInteractable
 {
     [SerializeField] SpriteRenderer _Visual;
     [SerializeField] float _Speed;
