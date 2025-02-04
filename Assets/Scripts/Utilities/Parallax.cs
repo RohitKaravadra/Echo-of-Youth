@@ -1,36 +1,29 @@
 using UnityEngine;
 
-public class Parallex : MonoBehaviour
+public class Parallax : MonoBehaviour
 {
     [SerializeField] Vector2 _Speed;
-    [SerializeField] bool _FollowX;
-    [SerializeField] bool _FollowY;
-    [SerializeField] Vector2 _Offset;
+    [SerializeField][Range(0.01f, 5f)] float _MaxThreshold;
 
-    SpriteRenderer _Renderer;
-    Transform _MainCamera;
+    Vector2 _LastCamPos;
+    Transform _Camera;
 
-    Vector2 _InitPos;
-
-    private void Awake()
+    private void Start()
     {
-        _MainCamera = Camera.main.transform;
-        _Renderer = GetComponent<SpriteRenderer>();
-
-        _InitPos = (Vector2)transform.position + _Offset;
+        _Camera = Camera.main.transform;
+        _LastCamPos = _Camera.position;
     }
 
     private void Update()
     {
-        if (_MainCamera != null)
-        {
-            Vector2 camPos = _MainCamera.position;
+        Vector2 newCamPos = _Camera.position;
+        Vector2 offset = newCamPos - _LastCamPos;
 
-            Vector2 pos = new(_FollowX ? camPos.x : _InitPos.x, _FollowY ? camPos.y : _InitPos.y);
-            transform.position = pos;
+        _LastCamPos = newCamPos;
 
-            Vector2 offset = camPos - _InitPos;
-            _Renderer.material.SetVector("_Offset", offset * _Speed);
-        }
+        if (offset.magnitude > _MaxThreshold)
+            return;
+
+        transform.position = (Vector2)transform.position - offset * _Speed;
     }
 }
