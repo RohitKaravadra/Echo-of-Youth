@@ -4,11 +4,10 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] Scenes _ThisScene;
+    [SerializeField] Scenes _NextScene;
     bool _Pause = false;
     public static GameManager Instance { get; private set; }    // Singleton Instances
     public static bool HasInstance => Instance != null;
-    public static Scenes CurrentScene { get; private set; } = Scenes.MainMenu;
     private void Awake()
     {
         // Singleton implementation
@@ -19,8 +18,6 @@ public class GameManager : MonoBehaviour
             Debug.LogWarning("Instance of " + this.name + " already exists \n deleting this instance");
             Destroy(this);
         }
-
-        CurrentScene = _ThisScene;
     }
 
     private void Start()
@@ -53,12 +50,7 @@ public class GameManager : MonoBehaviour
         GameEvents.Game.OnGamePause?.Invoke(_Pause);
     }
 
-    private void LoadNextScene()
-    {
-        int totalScenes = Enum.GetNames(typeof(Scenes)).Length;
-        int next = (int)_ThisScene == totalScenes - 1 ? (int)Scenes.MainMenu : (int)_ThisScene + 1;
-        SceneManager.LoadScene(next);
-    }
+    private void LoadNextScene() => SceneManager.LoadScene((int)_NextScene);
 
     private void LevelOver()
     {

@@ -5,9 +5,7 @@ public class PlayerController : MonoBehaviour
 {
     [Header("For Testing")]
     [SerializeField] bool _EnableGun;
-    [SerializeField] bool _OverrideCharacter;
     [SerializeField] Character _Character;
-    [SerializeField] PlayerStats _Stats;
     [Space(10)]
     [SerializeField] float _CoyoteTime;
     [SerializeField][Range(0.0001f, 0.1f)] float _MoveThreshold;
@@ -45,6 +43,8 @@ public class PlayerController : MonoBehaviour
     ContactFilter2D _GroundFilter;
     RaycastHit2D[] _HitResults = new RaycastHit2D[2];
     Rigidbody2D _Ground = null;
+
+    PlayerStats _Stats;
 
     bool _IsAlive;
     bool _IsGrounded;
@@ -141,21 +141,11 @@ public class PlayerController : MonoBehaviour
         _SlideData.SetLayerMask(_GroundLayers);
         _SlideData.useSimulationMove = false;
 
-        if (_OverrideCharacter)
-            _Stats = _PlayerData.Get(_Character);
-        else
-            // set player stats and create character visuals
-            _Stats = GameManager.CurrentScene switch
-            {
-                Scenes.MainMenu => _PlayerData.Get(Character.Grandpa),
-                Scenes.Level1 => _PlayerData.Get(Character.Grandpa),
-                Scenes.Level2 => _PlayerData.Get(Character.Daddy),
-                Scenes.Level3 => _PlayerData.Get(Character.Kid),
-                _ => throw new System.NotImplementedException()
-            };
-
+        // set character
+        _Stats = _PlayerData.Get(_Character);
         _CharacterCreater.Create(_Stats.sprites);
 
+        // set visuals and colliders
         _Visuals.localScale = Vector3.one * _Stats.scale;
         _Collider.size *= _Stats.scale;
         _Collider.offset = _Collider.transform.localPosition * _Stats.scale - _Collider.transform.localPosition;
