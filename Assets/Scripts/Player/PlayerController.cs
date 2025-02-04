@@ -105,6 +105,8 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!_IsAlive)
+            return;
         Move(Time.fixedDeltaTime);  // apply movement
     }
 
@@ -220,7 +222,7 @@ public class PlayerController : MonoBehaviour
         // apply moving objects velocity
         if (_Ground != null)
             pos.x += _Ground.linearVelocityX * deltaTime;
-        
+
         // update new position of rigidbody
         _Rb.MovePosition(pos);
     }
@@ -267,13 +269,16 @@ public class PlayerController : MonoBehaviour
     private void OnDeath()
     {
         _IsAlive = false;
-        _Velocity = Vector2.zero;
+        _Rb.simulated = false;
         _Ragdoll.Enable();
-        _BloodParticles.Play();
+        _Gun.Enabled = false;
 
-        if (CameraManager.Instance != null)
+        _BloodParticles.Play();
+        AudioManager.Instance?.PlaySound(AudioFile.Blood);
+
+        if (CameraManager.HasInstance)
             CameraManager.Instance.ApplyShake(_DeathShake);
-        if (InputManager.Instance != null)
+        if (InputManager.HasInstance)
             InputManager.Instance.SetInput(false);
 
         Invoke(nameof(OnRespawn), _RespawnTime);
@@ -282,8 +287,13 @@ public class PlayerController : MonoBehaviour
     private void OnRespawn()
     {
         _Ragdoll.Disable();
+
         transform.position = _InitialPos;
+        _Gun.Enabled = _EnableGun;
+
         _IsAlive = true;
+        _Rb.simulated = true;
+
         if (InputManager.Instance != null)
             InputManager.Instance.SetInput(true);
     }
@@ -325,8 +335,11 @@ public class PlayerController : MonoBehaviour
             OnDeath();
         else if (collision.CompareTag("Gun"))
         {
-            if (!_Gun.Enabled)
+            if (!_EnableGun)
+            {
+                _EnableGun = true;
                 _Gun.Enabled = true;
+            }
             Destroy(collision.gameObject);
         }
     }

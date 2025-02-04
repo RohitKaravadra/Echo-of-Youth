@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class Interactable : MonoBehaviour
+public class CrosshairCollision : MonoBehaviour
 {
     public static Action<Transform, bool> OnObjectHover;
 

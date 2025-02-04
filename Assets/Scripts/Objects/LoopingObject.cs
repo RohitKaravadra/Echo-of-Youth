@@ -82,7 +82,7 @@ public class LoopingObject : MonoBehaviour, IInteractable
         _Direction *= -1;
         UpdateIndex();
 
-        return _MinThreshold != 0;
+        return true;
     }
 
     public void OnSelect(bool state)

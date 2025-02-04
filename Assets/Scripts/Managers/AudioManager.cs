@@ -5,7 +5,8 @@ using UnityEngine;
 public enum AudioFile
 {
     Reverse,
-    Jump
+    Jump,
+    Blood
 }
 
 [Serializable]
@@ -24,6 +25,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField] AudioFileData[] _AudioFiles;
 
     public static AudioManager Instance { get; private set; }  // Singleton Instance
+    public static bool HasInstance => Instance != null;
     private void Awake()
     {
         // Singleton implementation

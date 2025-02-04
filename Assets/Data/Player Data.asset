@@ -31,9 +31,9 @@ MonoBehaviour:
     - part: 2
       sprite: {fileID: 21300000, guid: e3ca30a357c337044bb9325adb93f4e6, type: 3}
     - part: 5
-      sprite: {fileID: 21300000, guid: e2853067db9fe5344ae345a8b6eeeb5c, type: 3}
-    - part: 5
       sprite: {fileID: 21300000, guid: 2c1d2272353bba44cbcaebcf1aad0714, type: 3}
+    - part: 4
+      sprite: {fileID: 21300000, guid: 9a905e9e19f505a48bea9dae11c38c6c, type: 3}
   - type: 1
     scale: 1
     speed: 4

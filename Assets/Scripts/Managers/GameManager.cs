@@ -7,6 +7,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] Scenes _ThisScene;
     bool _Pause = false;
     public static GameManager Instance { get; private set; }    // Singleton Instances
+    public static bool HasInstance => Instance != null;
     public static Scenes CurrentScene { get; private set; } = Scenes.MainMenu;
     private void Awake()
     {

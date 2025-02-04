@@ -6,7 +6,7 @@ public class InputManager : MonoBehaviour
 {
     private PlayerInput _Inputs;
     public static InputManager Instance { get; private set; }   // Singleton Instance
-
+    public static bool HasInstance => Instance != null;
     private void Awake()
     {
         // Singleton implementation

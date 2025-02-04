@@ -312,8 +312,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -8196121713257968172, guid: bbb47b9008fe52648b17c4fe581e0d08, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: -5456200687822887319, guid: 1d53f636ab0587349aa1601f100d6458, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -970,10 +970,10 @@ MonoBehaviour:
   m_enableVertexGradient: 1
   m_colorMode: 3
   m_fontColorGradient:
-    topLeft: {r: 1, g: 0, b: 0, a: 1}
-    topRight: {r: 1, g: 0.31476256, b: 0.009433806, a: 1}
-    bottomLeft: {r: 1, g: 0.73484355, b: 0, a: 1}
-    bottomRight: {r: 1, g: 0.9322525, b: 0, a: 1}
+    topLeft: {r: 1, g: 1, b: 1, a: 1}
+    topRight: {r: 1, g: 0.5764481, b: 0, a: 1}
+    bottomLeft: {r: 1, g: 0, b: 0.02213049, a: 1}
+    bottomRight: {r: 1, g: 0.09874336, b: 0, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0

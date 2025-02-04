@@ -13,13 +13,14 @@ public class Crosshair : MonoBehaviour
     private Vector2 _CursorDelta;
 
     private Vector2 _ScreenCenter;
-    private float _CurserRange = 0;
+    private Vector2 _CurserRange = Vector2.zero;
 
     public bool Enabled { get => gameObject.activeSelf; set { gameObject.SetActive(value); _CrosshairObject.gameObject.SetActive(value); } }
     public Vector2 WorldPos => _MainCam.ScreenToWorldPoint(transform.position);
     public Vector2 LocalPos => _CursorDelta;
 
     public static Crosshair Instance { get; private set; } // singleton Instance
+    public static bool HasInstance => Instance != null;
     private void Awake()
     {
         // Singleton implementation
@@ -51,7 +52,7 @@ public class Crosshair : MonoBehaviour
 
     private void SetBoundsData()
     {
-        _CurserRange = Screen.height / 200f * _Range;
+        _CurserRange = new Vector2(Screen.width, Screen.height) / 200f * _Range;
         _ScreenCenter = new Vector2(Screen.width, Screen.height) / 2;
     }
     private void OnDestroy()
@@ -60,9 +61,12 @@ public class Crosshair : MonoBehaviour
             Instance = null;
     }
 
-    private void UpdateSensi(float value) => _Sensi = value;
-
-    private Vector2 ClampValues(Vector2 value) => Vector2.ClampMagnitude(value, _CurserRange);
+    private Vector2 ClampValues(Vector2 value)
+    {
+        value.x = Mathf.Clamp(value.x, -_CurserRange.x, _CurserRange.x);
+        value.y = Mathf.Clamp(value.y, -_CurserRange.y, _CurserRange.y);
+        return value;
+    }
 
     public void OnLook(Vector2 value)
     {

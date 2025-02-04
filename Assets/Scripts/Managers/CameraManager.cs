@@ -27,6 +27,7 @@ public class CameraManager : MonoBehaviour
     private CinemachineBasicMultiChannelPerlin _Noise;
 
     public static CameraManager Instance { get; private set; }  // Singleton Instance
+    public static bool HasInstance => Instance != null;
     private void Awake()
     {
         // Singleton implementation

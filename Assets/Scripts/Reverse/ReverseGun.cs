@@ -22,9 +22,11 @@ public class ReverseGun : MonoBehaviour
         get => gameObject.activeSelf; set
         {
             gameObject.SetActive(value);
-            if (Crosshair.Instance != null)
+            if (Crosshair.HasInstance)
                 Crosshair.Instance.Enabled = value;
-            _Laser.Enabled = false;
+
+            _HoveringObject = null;
+            OnSelected(false);
         }
     }
 
@@ -33,7 +35,7 @@ public class ReverseGun : MonoBehaviour
         GameEvents.Input.OnObjectSelect += OnSelected;
         GameEvents.Input.OnObjectReverse += OnReverse;
         GameEvents.Input.OnPlayerLook += OnLook;
-        Interactable.OnObjectHover += OnHover;
+        CrosshairCollision.OnObjectHover += OnHover;
     }
 
     private void OnDisable()
@@ -41,7 +43,7 @@ public class ReverseGun : MonoBehaviour
         GameEvents.Input.OnObjectSelect -= OnSelected;
         GameEvents.Input.OnObjectReverse -= OnReverse;
         GameEvents.Input.OnPlayerLook -= OnLook;
-        Interactable.OnObjectHover -= OnHover;
+        CrosshairCollision.OnObjectHover -= OnHover;
     }
 
     private void Start()
@@ -164,6 +166,7 @@ public class ReverseGun : MonoBehaviour
             {
                 AudioManager.Instance?.PlaySound(AudioFile.Reverse);
                 _SelectedObject = null;
+                _HoveringObject.OnHover(false);
                 _HoveringObject = null;
             }
         }
