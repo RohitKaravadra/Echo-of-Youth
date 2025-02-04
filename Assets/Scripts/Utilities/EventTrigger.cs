@@ -17,6 +17,9 @@ public class EventTrigger : MonoBehaviour
             case TriggerEvents.GameOver:
                 GameEvents.Game.OnLevelOver?.Invoke();
                 break;
+            case TriggerEvents.CheckPoint:
+                GameEvents.Game.OnCheckPointReached?.Invoke(transform.position);
+                break;
         }
     }
 

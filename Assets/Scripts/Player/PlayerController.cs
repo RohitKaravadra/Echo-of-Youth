@@ -84,12 +84,14 @@ public class PlayerController : MonoBehaviour
     {
         GameEvents.Input.OnPlayerMove += OnMove;        // Subscribe to Move Input
         GameEvents.Input.OnPlayerJump += OnJump;        // Subscribe to Jump Input
+        GameEvents.Game.OnCheckPointReached += OnCheckPoint;
     }
 
     private void OnDisable()
     {
         GameEvents.Input.OnPlayerMove -= OnMove;        // Unsubscribe from Move Input
         GameEvents.Input.OnPlayerJump -= OnJump;        // Unsubscribe from Jump Input
+        GameEvents.Game.OnCheckPointReached -= OnCheckPoint;
     }
 
     private void Update()
@@ -339,4 +341,6 @@ public class PlayerController : MonoBehaviour
         if (collision.transform.CompareTag("Danger") && _IsAlive)
             OnDeath();
     }
+
+    private void OnCheckPoint(Vector2 pos) => _InitialPos = pos;
 }

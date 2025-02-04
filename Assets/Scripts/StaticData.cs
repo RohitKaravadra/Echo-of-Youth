@@ -4,7 +4,8 @@ using System;
 [Serializable]
 public enum TriggerEvents
 {
-    GameOver
+    GameOver,
+    CheckPoint
 }
 
 [Serializable]
@@ -22,6 +23,7 @@ public static class GameEvents
     {
         public static Action<bool> OnGamePause;
         public static Action OnLevelOver;
+        public static Action<Vector2> OnCheckPointReached;
     }
 
     public static class UI

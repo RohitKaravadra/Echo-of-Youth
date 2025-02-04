@@ -17,8 +17,9 @@ public class OutlineEffect : MonoBehaviour
         objSR.sortingLayerID = mySR.sortingLayerID;
         objSR.sortingOrder = mySR.sortingOrder - 1;
         objSR.material.SetColor("_Color", _Color);
+        objSR.tileMode = mySR.tileMode;
 
-        _OutlineObject.transform.localScale = Vector3.one * (_Tickness + 1);
+        _OutlineObject.transform.localScale = mySR.transform.localScale * (_Tickness + 1);
 
         Enabled = false;
     }

@@ -10240,18 +10240,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _EnableGun: 0
-  _OverrideCharacter: 0
   _Character: 2
-  _Stats:
-    type: 0
-    scale: 0
-    speed: 5
-    airControl: 0
-    jumpForce: 6
-    maxJumpCount: 2
-    acceleration: 19
-    deceleration: 14
-    sprites: []
   _CoyoteTime: 0.1
   _MoveThreshold: 0.07
   _Gravity: 10
@@ -10330,7 +10319,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7165697015959285049}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: -1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -10338,7 +10327,7 @@ Transform:
   - {fileID: 2401098124151986863}
   - {fileID: 6188499412565213669}
   m_Father: {fileID: 7411340820957735845}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
 --- !u!114 &7844767523155518328
 MonoBehaviour:
   m_ObjectHideFlags: 0
