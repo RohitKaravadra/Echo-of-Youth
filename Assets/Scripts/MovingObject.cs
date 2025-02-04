@@ -1,22 +1,25 @@
-using System;
-using System.Linq;
+
 using UnityEngine;
 
 public class MovingObject : MonoBehaviour, IInteractable
 {
     [SerializeField] SpriteRenderer _Visual;
-    [SerializeField] Vector2[] _MovePositions;
     [SerializeField] float _Speed;
+    [SerializeField][Range(-1, 1)] int _Direction = 1;
     [SerializeField] float _MinThreshold;
+    [SerializeField] Vector2[] _MovePositions;
     // speed
 
     OutlineEffect _Outline;
     Rigidbody2D _Rigidbody;
+
     float _LastReverse = 0;
     int _CurrentIndex;
+
     bool _Hover = false;
     Vector2 _InitPosition; // initial position of this object
     public Vector2 Position => transform.position;
+    private bool CanReverse => Time.time - _LastReverse > _MinThreshold;
 
     private void Start()
     {
@@ -34,23 +37,35 @@ public class MovingObject : MonoBehaviour, IInteractable
 
     private void Update()
     {
+        _Outline.Enabled = _Hover && CanReverse;
+
         if (Vector2.Distance(transform.position, _InitPosition + _MovePositions[_CurrentIndex]) < 0.1f)
-            _CurrentIndex = (_CurrentIndex + 1) % _MovePositions.Length;
-
-        Vector2 pos = Vector2.MoveTowards(transform.position, _InitPosition + _MovePositions[_CurrentIndex], Time.deltaTime * _Speed);
-        _Rigidbody.MovePosition(pos);
+        {
+            _Rigidbody.MovePosition(_InitPosition + _MovePositions[_CurrentIndex]);
+            UpdateIndex();
+            return;
+        }
     }
 
-    public bool Compare(Transform other)
+    private void FixedUpdate()
     {
-        return false;
+        _Rigidbody.linearVelocity =
+            (_InitPosition + _MovePositions[_CurrentIndex] - (Vector2)transform.position).normalized
+            * Time.deltaTime * _Speed;
     }
+
+    private void UpdateIndex()
+    {
+        _CurrentIndex = (_CurrentIndex + _Direction) % _MovePositions.Length;
+        if (_CurrentIndex < 0) _CurrentIndex = _CurrentIndex + _MovePositions.Length;
+    }
+
+    public bool Compare(Transform other) => transform.Equals(other.transform);
 
     public void OnHover(bool state, bool selected = false)
     {
         print("Hover");
         _Hover = state;
-        _Outline.Enabled = _Hover;
     }
 
     public void OnMove(Vector2 position)
@@ -60,13 +75,14 @@ public class MovingObject : MonoBehaviour, IInteractable
 
     public bool OnReverse()
     {
-        if (Time.time - _LastReverse < _MinThreshold)
+        if (!CanReverse)
             return false;
 
         _LastReverse = Time.time;
-        ReversePositions();
+        _Direction *= -1;
+        UpdateIndex();
 
-        return true;
+        return _MinThreshold != 0;
     }
 
     public void OnSelect(bool state)
@@ -74,25 +90,25 @@ public class MovingObject : MonoBehaviour, IInteractable
 
     }
 
-    private void ReversePositions()
-    {
-        Array.Reverse(_MovePositions, 0, _MovePositions.Length);
-        _CurrentIndex = _MovePositions.Length - _CurrentIndex - 1;
-    }
-
     private void OnDrawGizmos()
     {
-        if (_MovePositions.Length == 0)
+        if (_MovePositions == null || _MovePositions.Length == 0)
             return;
 
         Vector2 initPos = _InitPosition == Vector2.zero ? transform.position : _InitPosition;
 
-        Gizmos.color = Color.green;
+        // draw path through all points
         for (int i = 0; i < _MovePositions.Length - 1; i++)
         {
+            Gizmos.color = i == 0 ? Color.yellow : Color.green;
             Gizmos.DrawSphere(initPos + _MovePositions[i], 0.1f);
+            Gizmos.color = Color.green;
             Gizmos.DrawLine(initPos + _MovePositions[i], initPos + _MovePositions[i + 1]);
         }
-        Gizmos.DrawSphere(initPos + _MovePositions.Last(), 0.1f);
+
+        // connect end with start
+        Gizmos.DrawLine(initPos + _MovePositions[_MovePositions.Length - 1], initPos + _MovePositions[0]);
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(initPos + _MovePositions[_MovePositions.Length - 1], 0.1f);
     }
 }

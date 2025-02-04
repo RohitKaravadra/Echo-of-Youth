@@ -369,6 +369,7 @@ GameObject:
   - component: {fileID: 8698324550085161987}
   - component: {fileID: 2389706235705953187}
   - component: {fileID: 399509592103516860}
+  - component: {fileID: 4042004461671422634}
   - component: {fileID: 1729078906712586837}
   m_Layer: 0
   m_Name: Draggable Object
@@ -412,7 +413,6 @@ MonoBehaviour:
   _TrailThreshold: 1
   _ReverseSpeed: 0.5
   _Visuals: {fileID: 2708015784987315739}
-  _OutlineObject: {fileID: 483603377000887268}
   _TrailRenderer: {fileID: 6298787356780087220}
 --- !u!114 &399509592103516860
 MonoBehaviour:
@@ -429,6 +429,18 @@ MonoBehaviour:
   _Tickness: 0.07
   _OutlineObject: {fileID: 483603377000887268}
   _Color: {r: 0.13423347, g: 1, b: 0, a: 0}
+--- !u!114 &4042004461671422634
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9208322051448294214}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2540b29df9f60374abc829985bb0711c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!50 &1729078906712586837
 Rigidbody2D:
   serializedVersion: 5

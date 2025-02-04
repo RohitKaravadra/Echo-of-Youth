@@ -44,6 +44,7 @@ public class PlayerController : MonoBehaviour
 
     ContactFilter2D _GroundFilter;
     RaycastHit2D[] _HitResults = new RaycastHit2D[2];
+    Rigidbody2D _Ground = null;
 
     bool _IsAlive;
     bool _IsGrounded;
@@ -136,7 +137,7 @@ public class PlayerController : MonoBehaviour
         _SlideData.surfaceUp = Vector2.up;
 
         _SlideData.SetLayerMask(_GroundLayers);
-        _SlideData.useSimulationMove = true;
+        _SlideData.useSimulationMove = false;
 
         if (_OverrideCharacter)
             _Stats = _PlayerData.Get(_Character);
@@ -214,8 +215,14 @@ public class PlayerController : MonoBehaviour
         _SlideData.surfaceAnchor = new Vector2(0, _IsJumping ? 0 : -_GroundDistance);
 
         // update position
-        _Rb.Slide(_Velocity, deltaTime, _SlideData);
+        Vector2 pos = _Rb.Slide(_Velocity, deltaTime, _SlideData).position;
 
+        // apply moving objects velocity
+        if (_Ground != null)
+            pos.x += _Ground.linearVelocityX * deltaTime;
+        
+        // update new position of rigidbody
+        _Rb.MovePosition(pos);
     }
 
     void UpdateJump()
@@ -246,6 +253,10 @@ public class PlayerController : MonoBehaviour
         bool wasGrounded = _IsGrounded;
 
         _IsGrounded = _Velocity.y <= 0 && _Collider.Cast(Vector2.down, _GroundFilter, _HitResults, _GroundDistance) > 0;     // foot collision
+
+        if (!_IsGrounded || !_HitResults[0].transform.TryGetComponent(out _Ground))
+            _Ground = null;
+
         _IsHeadCollide = _Velocity.y > 0 && _Collider.Cast(Vector2.up, _GroundFilter, _HitResults, _CellingDistance) > 0;    // head collision
         _IsWallCollide = _Collider.Cast(Vector2.right * _XDirection, _GroundFilter, _HitResults, _WallDistance) > 0;         // wall collision
 

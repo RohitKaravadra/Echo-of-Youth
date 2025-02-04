@@ -164,16 +164,4 @@ public class Reversible : MonoBehaviour, IInteractable
         _TrailRenderer.enabled = false;
         _Rb.simulated = true;
     }
-
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.CompareTag("Cursor"))
-            ReverseGun.OnObjectHover?.Invoke(transform, true);
-
-    }
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        if (collision.CompareTag("Cursor"))
-            ReverseGun.OnObjectHover?.Invoke(transform, false);
-    }
 }

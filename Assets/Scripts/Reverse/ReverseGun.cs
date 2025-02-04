@@ -9,8 +9,6 @@ public class ReverseGun : MonoBehaviour
     [SerializeField] Laser _Laser;
     [SerializeField] ShakeData _CameraShake;
 
-    public static Action<Transform, bool> OnObjectHover;
-
     bool _Selected = false;
 
     IInteractable _HoveringObject = null;
@@ -35,7 +33,7 @@ public class ReverseGun : MonoBehaviour
         GameEvents.Input.OnObjectSelect += OnSelected;
         GameEvents.Input.OnObjectReverse += OnReverse;
         GameEvents.Input.OnPlayerLook += OnLook;
-        OnObjectHover += ObjectHover;
+        Interactable.OnObjectHover += OnHover;
     }
 
     private void OnDisable()
@@ -43,7 +41,7 @@ public class ReverseGun : MonoBehaviour
         GameEvents.Input.OnObjectSelect -= OnSelected;
         GameEvents.Input.OnObjectReverse -= OnReverse;
         GameEvents.Input.OnPlayerLook -= OnLook;
-        OnObjectHover -= ObjectHover;
+        Interactable.OnObjectHover -= OnHover;
     }
 
     private void Start()
@@ -107,7 +105,7 @@ public class ReverseGun : MonoBehaviour
         transform.up = (_CursorPos - (Vector2)transform.position).normalized;
     }
 
-    private void ObjectHover(Transform obj, bool state)
+    private void OnHover(Transform obj, bool state)
     {
         if (state)
         {
