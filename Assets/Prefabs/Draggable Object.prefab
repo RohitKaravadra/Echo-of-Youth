@@ -427,6 +427,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _Tickness: 0.07
+  _OutlineObject: {fileID: 483603377000887268}
   _Color: {r: 0.13423347, g: 1, b: 0, a: 0}
 --- !u!50 &1729078906712586837
 Rigidbody2D:

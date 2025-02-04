@@ -4,6 +4,7 @@ using UnityEngine;
 public class ReverseGun : MonoBehaviour
 {
     [SerializeField] float _MinGunPullDistance;
+    [SerializeField] float _MaxObjectDistance;
     [SerializeField] Transform _GunHead;
     [SerializeField] Laser _Laser;
     [SerializeField] ShakeData _CameraShake;
@@ -12,8 +13,8 @@ public class ReverseGun : MonoBehaviour
 
     bool _Selected = false;
 
-    IReversible _HoveringObject = null;
-    IReversible _SelectedObject = null;
+    IInteractable _HoveringObject = null;
+    IInteractable _SelectedObject = null;
 
     Vector2 _CursorPos = Vector2.zero;
     bool _TooClose = false;
@@ -81,8 +82,16 @@ public class ReverseGun : MonoBehaviour
 
             if (_SelectedObject != null)
             {
-                _Laser.Set(_GunHead.position, _SelectedObject.Position);
-                _SelectedObject.OnMove(pos);
+                if (Vector2.Distance(_SelectedObject.Position, pos) > _MaxObjectDistance)
+                {
+                    _SelectedObject?.OnSelect(false);
+                    _SelectedObject = null;
+                }
+                else
+                {
+                    _Laser.Set(_GunHead.position, _SelectedObject.Position);
+                    _SelectedObject.OnMove(pos);
+                }
             }
             else
                 _Laser.Set(_GunHead.position, pos);
@@ -102,7 +111,7 @@ public class ReverseGun : MonoBehaviour
     {
         if (state)
         {
-            if (obj.TryGetComponent<IReversible>(out IReversible newHover))
+            if (obj.TryGetComponent(out IInteractable newHover))
             {
                 _HoveringObject?.OnHover(false);
                 _HoveringObject = newHover;

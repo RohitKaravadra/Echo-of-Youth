@@ -24,9 +24,9 @@ public static class GameEvents
         public static Action OnLevelOver;
     }
 
-    public static class Camera
+    public static class UI
     {
-
+        public static Action<Dialogue> OnDialogueTriggered;
     }
 
     public static class Input

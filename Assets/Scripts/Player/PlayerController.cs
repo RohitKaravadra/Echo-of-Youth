@@ -24,11 +24,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField][Range(0, 90)] float _SurfaceSlideAngle;
     [Space(5)]
     [SerializeField] LayerMask _GroundLayers;
+    [SerializeField] ShakeData _DeathShake;
+    [SerializeField] float _RespawnTime;
     [Space(5)]
     [SerializeField] CapsuleCollider2D _Collider;
     [SerializeField] Animator _Animator;
     [SerializeField] Transform _Visuals;
     [SerializeField] ReverseGun _Gun;
+    [SerializeField] Ragdoll _Ragdoll;
+    [SerializeField] ParticleSystem _BloodParticles;
     [SerializeField] CharacterCreator _CharacterCreater;
     [SerializeField] PlayerData _PlayerData;
 
@@ -41,6 +45,7 @@ public class PlayerController : MonoBehaviour
     ContactFilter2D _GroundFilter;
     RaycastHit2D[] _HitResults = new RaycastHit2D[2];
 
+    bool _IsAlive;
     bool _IsGrounded;
     bool _IsJumping;
     bool _IsMoving;
@@ -56,13 +61,17 @@ public class PlayerController : MonoBehaviour
     int _XDirection = 1;
     Vector2 _Velocity = Vector2.zero;
 
+    Vector2 _InitialPos;
+
     private void Awake()
     {
         _Rb = GetComponent<Rigidbody2D>();
+        _IsAlive = true;
     }
 
     private void Start()
     {
+        _InitialPos = transform.position;
         _Gun.Enabled = _EnableGun;
         SetData();
 
@@ -84,6 +93,9 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        if (!_IsAlive)
+            return;
+
         CheckCollision();                   // check head and foot collisions
         UpdateJump();                       // update jump data
         SetAnimations();                    // set animation states
@@ -93,6 +105,11 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         Move(Time.fixedDeltaTime);  // apply movement
+    }
+
+    private void OnDestroy()
+    {
+        CancelInvoke(nameof(OnRespawn));
     }
 
     /// <summary>
@@ -236,6 +253,30 @@ public class PlayerController : MonoBehaviour
             _LastGroundTime = Time.time;
     }
 
+    private void OnDeath()
+    {
+        _IsAlive = false;
+        _Velocity = Vector2.zero;
+        _Ragdoll.Enable();
+        _BloodParticles.Play();
+
+        if (CameraManager.Instance != null)
+            CameraManager.Instance.ApplyShake(_DeathShake);
+        if (InputManager.Instance != null)
+            InputManager.Instance.SetInput(false);
+
+        Invoke(nameof(OnRespawn), _RespawnTime);
+    }
+
+    private void OnRespawn()
+    {
+        _Ragdoll.Disable();
+        transform.position = _InitialPos;
+        _IsAlive = true;
+        if (InputManager.Instance != null)
+            InputManager.Instance.SetInput(true);
+    }
+
     void SetAnimations()
     {
         if (_Animator == null)
@@ -269,7 +310,9 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Gun"))
+        if (collision.CompareTag("Danger") && _IsAlive)
+            OnDeath();
+        else if (collision.CompareTag("Gun"))
         {
             if (!_Gun.Enabled)
                 _Gun.Enabled = true;

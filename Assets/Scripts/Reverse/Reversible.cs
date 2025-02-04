@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class Reversible : MonoBehaviour, IReversible
+public class Reversible : MonoBehaviour, IInteractable
 {
     [SerializeField] int _MaxReverseSteps = 100;
     [SerializeField] float _SnapshotThreshold = 0.2f;
@@ -11,12 +11,10 @@ public class Reversible : MonoBehaviour, IReversible
     [SerializeField][Range(0, 1)] float _ReverseSpeed = 1;
     [Space(10)]
     [SerializeField] SpriteRenderer _Visuals;
-    [SerializeField] GameObject _OutlineObject;
     [SerializeField] LineRenderer _TrailRenderer;
 
     Rigidbody2D _Rb;
     OutlineEffect _Outline;
-    bool _IsReversing = false;
 
     public Vector2 Position => transform.position;
 
@@ -44,7 +42,7 @@ public class Reversible : MonoBehaviour, IReversible
         _Outline = GetComponent<OutlineEffect>();
         _Rb = GetComponent<Rigidbody2D>();
 
-        _Outline.Set(_OutlineObject, _Visuals);
+        _Outline.Set(_Visuals);
     }
 
     private void Start()
@@ -80,7 +78,7 @@ public class Reversible : MonoBehaviour, IReversible
 
     private void SetOutline()
     {
-        _Outline.Enabled = _Hover || _Selected || _IsReversing;
+        _Outline.Enabled = _Hover || _Selected;
         _TrailRenderer.enabled = _Hover || _Selected;
     }
 
@@ -104,18 +102,19 @@ public class Reversible : MonoBehaviour, IReversible
         }
     }
 
-    public float OnMove(Vector2 position)
+    private void TakeSnapshot()
+    {
+        _History.Enqueue(new Snapshot(transform.position, transform.rotation, Time.time - _LastTime));
+        _LastTime = Time.time;
+        SetTrail();
+    }
+
+    public void OnMove(Vector2 position)
     {
         _Rb.MovePosition(Vector2.Lerp(_Rb.position, position, 0.3f));
 
         if (_History.Size == 0 || (_History.Last.pos - _Rb.position).magnitude > _SnapshotThreshold)
-        {
-            _History.Enqueue(new Snapshot(transform.position, transform.rotation, Time.time - _LastTime));
-            _LastTime = Time.time;
-            SetTrail();
-        }
-
-        return _History.Size / _History.Capacity;
+            TakeSnapshot();
     }
 
     public bool OnReverse()
@@ -138,11 +137,9 @@ public class Reversible : MonoBehaviour, IReversible
 
         _History.Reverse();
 
-        _IsReversing = true;
-        SetOutline();
         _Rb.simulated = false;
 
-        Snapshot data = new();
+        Snapshot data;
         float delta;
 
         while (_History.Size > 0)
@@ -165,8 +162,6 @@ public class Reversible : MonoBehaviour, IReversible
         }
 
         _TrailRenderer.enabled = false;
-        _IsReversing = false;
-        SetOutline();
         _Rb.simulated = true;
     }
 
