@@ -14,8 +14,11 @@ public struct DialoguePanel
 {
     public Dialogue dialogue;
     public GameObject panel;
+    [Space(5)]
     public float delay;
     public float time;
+    [Space(5)]
+    public Dialogue next;
     public bool disableInput;
 }
 
@@ -55,17 +58,26 @@ public class DialogueSystem : MonoBehaviour
         if (_Current.dialogue != Dialogue.None)
         {
             _Current.panel.SetActive(false);
-            _Current = _Null;
+
+            Dialogue next = _Current.next;
+
             if (_Current.disableInput && InputManager.Instance != null)
                 InputManager.Instance.SetInput(true);
+
+            _Current = _Null;
+
+            // check for continuous dialogues
+            if (next != Dialogue.None)
+                GameEvents.UI.OnDialogueTriggered?.Invoke(next);
         }
     }
 
     private void EnableDialogue()
     {
         // disable inputs
-        if (InputManager.Instance != null)
+        if (_Current.disableInput && InputManager.Instance != null)
             InputManager.Instance.SetInput(false);
+
         _Current.panel.SetActive(true);
         Invoke(nameof(DisableDialogue), _Current.time);
     }

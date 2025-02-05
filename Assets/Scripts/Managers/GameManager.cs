@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     [SerializeField] Scenes _NextScene;
+    [SerializeField] float _LoadAfterTime = 2.0f;
     bool _Pause = false;
     public static GameManager Instance { get; private set; }    // Singleton Instances
     public static bool HasInstance => Instance != null;
@@ -57,6 +58,6 @@ public class GameManager : MonoBehaviour
     private void LevelOver()
     {
         GameEvents.Input.OnSetInputState?.Invoke(false);
-        Invoke(nameof(LoadNextScene), 2f);
+        Invoke(nameof(LoadNextScene), _LoadAfterTime);
     }
 }
