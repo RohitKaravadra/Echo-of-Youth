@@ -36,12 +36,12 @@ MonoBehaviour:
       sprite: {fileID: 21300000, guid: 9a905e9e19f505a48bea9dae11c38c6c, type: 3}
   - type: 1
     scale: 1
-    speed: 4
+    speed: 5
     airControl: 1
-    jumpForce: 5
+    jumpForce: 6
     maxJumpCount: 2
-    acceleration: 19
-    deceleration: 14
+    acceleration: 14
+    deceleration: 11
     sprites:
     - part: 0
       sprite: {fileID: 21300000, guid: f808982fbd5d7894183ebc12b879fb18, type: 3}

@@ -24,7 +24,8 @@ public class LoopingObject : MonoBehaviour, IInteractable
     private void Start()
     {
         _InitPosition = transform.position;
-        _Outline.Set(_Visual);
+        if (_Outline != null)
+            _Outline.Set(_Visual);
     }
 
     private void Awake()
@@ -37,7 +38,8 @@ public class LoopingObject : MonoBehaviour, IInteractable
 
     private void Update()
     {
-        _Outline.Enabled = _Hover && CanReverse;
+        if (_Outline != null)
+            _Outline.Enabled = _Hover && CanReverse;
 
         if (Vector2.Distance(transform.position, _InitPosition + _MovePositions[_CurrentIndex]) < 0.1f)
         {
