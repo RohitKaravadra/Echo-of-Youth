@@ -273,6 +273,8 @@ public class PlayerController : MonoBehaviour
         if (InputManager.HasInstance)
             InputManager.Instance.SetInput(false);
 
+        GameEvents.Game.OnPlayerDead?.Invoke();
+
         Invoke(nameof(OnRespawn), _RespawnTime);
     }
 

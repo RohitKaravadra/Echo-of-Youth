@@ -35,6 +35,7 @@ public class ReverseGun : MonoBehaviour
         GameEvents.Input.OnObjectSelect += OnSelected;
         GameEvents.Input.OnObjectReverse += OnReverse;
         GameEvents.Input.OnPlayerLook += OnLook;
+        GameEvents.Game.OnPlayerDead += ResetGun;
         CrosshairCollision.OnObjectHover += OnHover;
     }
 
@@ -43,6 +44,7 @@ public class ReverseGun : MonoBehaviour
         GameEvents.Input.OnObjectSelect -= OnSelected;
         GameEvents.Input.OnObjectReverse -= OnReverse;
         GameEvents.Input.OnPlayerLook -= OnLook;
+        GameEvents.Game.OnPlayerDead -= ResetGun;
         CrosshairCollision.OnObjectHover -= OnHover;
     }
 
@@ -170,5 +172,11 @@ public class ReverseGun : MonoBehaviour
                 _HoveringObject = null;
             }
         }
+    }
+
+    private void ResetGun()
+    {
+        OnSelected(false);
+        OnHover(null, false);
     }
 }
