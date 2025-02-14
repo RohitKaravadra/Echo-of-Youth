@@ -9,6 +9,8 @@ public class GameManager : MonoBehaviour
     bool _Pause = false;
     public static GameManager Instance { get; private set; }    // Singleton Instances
     public static bool HasInstance => Instance != null;
+
+    bool _LevelOver;
     private void Awake()
     {
         // Singleton implementation
@@ -23,6 +25,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        _LevelOver = false;
         Time.timeScale = 1.0f;
         GameEvents.Input.OnSetInputState?.Invoke(!_Pause);
     }
@@ -47,6 +50,9 @@ public class GameManager : MonoBehaviour
 
     private void OnUICancel()
     {
+        if (_LevelOver)
+            return;
+
         _Pause = !_Pause;
         Time.timeScale = _Pause ? 0.0f : 1.0f;
         GameEvents.Input.OnSetInputState?.Invoke(!_Pause);
@@ -57,6 +63,7 @@ public class GameManager : MonoBehaviour
 
     private void LevelOver()
     {
+        _LevelOver = true;
         GameEvents.Input.OnSetInputState?.Invoke(false);
         Invoke(nameof(LoadNextScene), _LoadAfterTime);
     }

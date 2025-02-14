@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Trigger : MonoBehaviour
 {
-    public static event System.Action OnTriggerActivated;
+    public static System.Action OnTriggerActivated;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {

@@ -69,6 +69,7 @@ public class UIManager : MonoBehaviour
     public void OnRestartButton() => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     public void OnExitButton()
     {
+        Time.timeScale = 1.0f;
         SceneManager.LoadScene((int)Scenes.MainMenu);
     }
 

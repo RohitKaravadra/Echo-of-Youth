@@ -45,10 +45,7 @@ public class Reversible : MonoBehaviour, IInteractable
         _Outline.Set(_Visuals);
     }
 
-    private void Start()
-    {
-        _History = new(_MaxReverseSteps);
-    }
+    private void Start() => _History = new(_MaxReverseSteps);
 
     private void OnDestroy()
     {
@@ -84,9 +81,9 @@ public class Reversible : MonoBehaviour, IInteractable
 
     public bool Compare(Transform other) => transform.Equals(other);
 
-    public void OnHover(bool state, bool selected)
+    public void OnHover(bool state)
     {
-        _Hover = state && !selected;
+        _Hover = state;
         SetOutline();
     }
 
@@ -139,7 +136,7 @@ public class Reversible : MonoBehaviour, IInteractable
 
         _Rb.simulated = false;
 
-        Snapshot data;
+        Snapshot data = new();
         float delta;
 
         while (_History.Size > 0)
@@ -161,6 +158,7 @@ public class Reversible : MonoBehaviour, IInteractable
             yield return 0;
         }
 
+        transform.SetPositionAndRotation(data.pos, data.rot);
         _TrailRenderer.enabled = false;
         _Rb.simulated = true;
     }

@@ -4881,7 +4881,7 @@ CapsuleCollider2D:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 0
   m_LayerOverridePriority: 0
   m_ForceSendLayers:
     serializedVersion: 2
@@ -10253,7 +10253,7 @@ MonoBehaviour:
   _SurfaceSlideAngle: 45
   _GroundLayers:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 1
   _DeathShake:
     magnitude: 3
     frequency: 0.1

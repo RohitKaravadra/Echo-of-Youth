@@ -37,7 +37,7 @@ public class MovingObject : MonoBehaviour, IInteractable
     private void Update() => _Outline.Enabled = _Hover && !_IsMoving;
     public bool Compare(Transform other) => transform.Equals(other.transform);
 
-    public void OnHover(bool state, bool selected = false) => _Hover = state && !selected;
+    public void OnHover(bool state) => _Hover = state;
 
     public void OnMove(Vector2 position)
     {

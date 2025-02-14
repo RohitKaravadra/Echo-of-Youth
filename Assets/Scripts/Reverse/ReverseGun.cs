@@ -70,8 +70,8 @@ public class ReverseGun : MonoBehaviour
         {
             CameraManager.Instance?.ApplyShake(_CameraShake);
 
-            Vector2 pos = transform.position;
-            Vector2 diff = _CursorPos - pos;
+            Vector2 myPos = transform.position;
+            Vector2 diff = _CursorPos - myPos;
 
             if (_TooClose)
             {
@@ -79,12 +79,21 @@ public class ReverseGun : MonoBehaviour
                 return;
             }
 
-            pos = diff.magnitude < _MinGunPullDistance ?
-                 pos + diff.normalized * _MinGunPullDistance : _CursorPos;
+            Vector2 curPos = diff.magnitude < _MinGunPullDistance ?
+                 myPos + diff.normalized * _MinGunPullDistance : _CursorPos;
 
             if (_SelectedObject != null)
             {
-                if (Vector2.Distance(_SelectedObject.Position, pos) > _MaxObjectDistance)
+                // check if object is opposite side of player body
+                if (Vector2.Dot(curPos - myPos, _SelectedObject.Position - myPos) < 0.2f)
+                {
+                    _SelectedObject?.OnSelect(false);
+                    _SelectedObject = null;
+                    _HoveringObject?.OnHover(true);
+                    return;
+                }
+
+                if (Vector2.Distance(_SelectedObject.Position, curPos) > _MaxObjectDistance)
                 {
                     _SelectedObject?.OnSelect(false);
                     _SelectedObject = null;
@@ -92,11 +101,11 @@ public class ReverseGun : MonoBehaviour
                 else
                 {
                     _Laser.Set(_GunHead.position, _SelectedObject.Position);
-                    _SelectedObject.OnMove(pos);
+                    _SelectedObject.OnMove(curPos);
                 }
             }
             else
-                _Laser.Set(_GunHead.position, pos);
+                _Laser.Set(_GunHead.position, curPos);
         }
     }
 
@@ -117,7 +126,7 @@ public class ReverseGun : MonoBehaviour
             {
                 _HoveringObject?.OnHover(false);
                 _HoveringObject = newHover;
-                _HoveringObject.OnHover(state, _Selected);
+                _HoveringObject.OnHover(state && !_Selected);
 
                 if (_Selected && _SelectedObject == null)
                 {
@@ -153,7 +162,7 @@ public class ReverseGun : MonoBehaviour
         {
             _SelectedObject?.OnSelect(false);
             _SelectedObject = null;
-            _HoveringObject?.OnHover(true, _Selected);
+            _HoveringObject?.OnHover(true);
             AudioManager.Instance?.StopLaser();
         }
 

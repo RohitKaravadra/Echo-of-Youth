@@ -64,7 +64,7 @@ public class LoopingObject : MonoBehaviour, IInteractable
 
     public bool Compare(Transform other) => transform.Equals(other.transform);
 
-    public void OnHover(bool state, bool selected = false) => _Hover = state && !selected;
+    public void OnHover(bool state) => _Hover = state;
 
     public void OnMove(Vector2 position)
     {

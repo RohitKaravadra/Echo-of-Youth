@@ -59,7 +59,7 @@ MonoBehaviour:
     scale: 0.8
     speed: 5
     airControl: 1
-    jumpForce: 6
+    jumpForce: 8
     maxJumpCount: 2
     acceleration: 19
     deceleration: 14

@@ -1,26 +1,23 @@
 
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class ReversibleStatic : MonoBehaviour, IInteractable
 {
-    [SerializeField] int _MaxReverseSteps = 100000; // Practically infinite
+    [SerializeField] int _MaxReverseSteps = 100;
     [SerializeField] float _SnapshotThreshold = 0.1f;
-    [SerializeField] float _SnapshotTimeThreshold = 0.01f;
+    [SerializeField] float _TrailThreshold = 0.5f;
     [SerializeField][Range(0, 1)] float _ReverseSpeed = 1;
     [Space(10)]
     [SerializeField] SpriteRenderer _Visuals;
+    [SerializeField] LineRenderer _TrailRenderer;
 
     private Rigidbody2D _Rb;
     private OutlineEffect _Outline;
-    Snapshot _InitialSnapshot;
 
     public Vector2 Position => transform.position;
-    private bool triggered = false;
-    
+
     struct Snapshot
     {
         public Vector2 pos;
@@ -39,6 +36,7 @@ public class ReversibleStatic : MonoBehaviour, IInteractable
 
     bool _Selected;
     bool _Hover;
+    bool _Triggered = false;
 
     private void Awake()
     {
@@ -51,47 +49,60 @@ public class ReversibleStatic : MonoBehaviour, IInteractable
         _Outline.Set(_Visuals);
     }
 
-    private void Start()
-    {
-        _History = new(_MaxReverseSteps);
-        _InitialSnapshot = new Snapshot(transform.position, transform.rotation, 0);
-        TakeSnapshot(); // For the love of god please work
-    }
+    private void Start() => _History = new(_MaxReverseSteps);
 
-    private void OnDestroy()
-    {
-        StopAllCoroutines();
-    }
+    private void OnEnable() => Trigger.OnTriggerActivated += OnTriggerAction;
+    private void OnDisable() => Trigger.OnTriggerActivated -= OnTriggerAction;
+
+    private void OnDestroy() => StopAllCoroutines();
+
     void Update()
     {
-        _LastTime += Time.deltaTime;
+        _TrailRenderer.enabled = _Outline.Enabled;
 
-        if (_Rb.simulated && (_History.Size == 0 || (_LastTime >= _SnapshotTimeThreshold)))
-        {
-            if ((_History.Last.pos - _Rb.position).magnitude > _SnapshotThreshold)
-            {
+        if (_Triggered)
+            if (_History.Size == 0 || (_History.Last.pos - _Rb.position).magnitude > _SnapshotThreshold)
                 TakeSnapshot();
-            }
-            _LastTime = 0;
+    }
+
+    private void SetTrail(bool reverse = false)
+    {
+        if (_History.Size == 0)
+        {
+            _TrailRenderer.positionCount = 0;
+            return;
         }
+
+        Vector3[] pos = new Vector3[_History.Size];
+
+        int newSize = 0;
+        for (int i = 0; i < _History.Size; i++)
+        {
+            if (i == 0 || Vector2.Distance(_History[i].pos, pos[newSize - 1]) > _TrailThreshold)
+                pos[reverse ? _History.Size - newSize++ - 1 : newSize++] = _History[i].pos;
+        }
+
+        _TrailRenderer.positionCount = newSize;
+        _TrailRenderer.SetPositions(pos);
+    }
+    private void TakeSnapshot()
+    {
+        _History.Enqueue(new Snapshot(transform.position, transform.rotation, Time.time - _LastTime));
+        _LastTime = Time.time;
+        SetTrail();
     }
 
     public bool Compare(Transform other) => transform.Equals(other);
 
-    public void OnHover(bool state, bool selected)
+    public void OnHover(bool state)
     {
-        _Hover = state && !selected;
-                SetOutline();
+        _Hover = state;
+        SetOutline();
     }
 
     public void OnSelect(bool state)
     {
         return;
-    }
-
-    private void TakeSnapshot()
-    {
-        _History.Enqueue(new Snapshot(transform.position, transform.rotation, _LastTime));
     }
 
     public void OnMove(Vector2 position)
@@ -106,6 +117,7 @@ public class ReversibleStatic : MonoBehaviour, IInteractable
 
         _Selected = false;
         _Hover = false;
+        _Triggered = false;
 
         StartCoroutine(Reverse());
         return true;
@@ -120,60 +132,53 @@ public class ReversibleStatic : MonoBehaviour, IInteractable
 
         _Rb.simulated = false;
 
-        Snapshot data;
+        Snapshot data = new();
+        float delta;
 
         while (_History.Size > 0)
         {
             data = _History.Dequeue();
-            transform.SetPositionAndRotation(data.pos, data.rot);
-            yield return new WaitForSeconds(data.time / _ReverseSpeed);
+            SetTrail();
+
+            while (((Vector2)transform.position - data.pos).magnitude > 0.2f)
+            {
+                delta = (Time.deltaTime / data.time) * _ReverseSpeed;
+                Vector2 pos = Vector2.Lerp(transform.position, data.pos, delta);
+                Quaternion rot = Quaternion.Lerp(transform.rotation, data.rot, delta);
+
+                transform.SetPositionAndRotation(pos, rot);
+
+                yield return new WaitForEndOfFrame();
+            }
+
+            yield return 0;
         }
 
-        yield return 0;
-
-        _Rb.linearVelocity = Vector2.zero;
-        _Rb.angularVelocity = 0;
+        transform.SetPositionAndRotation(data.pos, data.rot);
+        _TrailRenderer.enabled = false;
 
         _Rb.bodyType = RigidbodyType2D.Static;
         _Rb.simulated = true;
-
-        transform.SetPositionAndRotation(_InitialSnapshot.pos, _InitialSnapshot.rot);
     }
+
     private void SetOutline()
     {
         _Outline.Enabled = _Hover || _Selected;
+        if (_Outline.Enabled)
+            SetTrail();
     }
 
     public void OnTriggerAction()
     {
-        // Activate only once. Ignore if already activated.
-        if (triggered)
-        {
-            Trigger.OnTriggerActivated -= OnTriggerAction;
-            return;
-        }
-        _LastTime = 0; // For correct reversing
-        triggered = true;
+        Trigger.OnTriggerActivated -= OnTriggerAction;
+        
+        _LastTime = Time.time;
+        TakeSnapshot();
+        _Triggered = true;
         _Rb.bodyType = RigidbodyType2D.Dynamic; // Let the box drop
 
         // Give random velocity
         _Rb.linearVelocity = new Vector2(Random.Range(-2, 2), Random.Range(-2, 2));
         _Rb.angularVelocity = Random.Range(-50, 50);
-    }
-
-    private void OnEnable()
-    {
-        // Subscribe to trigger
-        Trigger.OnTriggerActivated += OnTriggerAction;
-    }
-
-    private void OnDisable()
-    {
-        if (!triggered)
-        {
-            // Unsubscribe from trigger
-            Trigger.OnTriggerActivated -= OnTriggerAction;
-        }
-
     }
 }
