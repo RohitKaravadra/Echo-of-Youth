@@ -13,3 +13,15 @@ Team :-
 - [Me](https://github.com/RohitKaravadra)
 
 You can play this game at [Echo of Youth](https://vec1or2000.itch.io/echo-of-youth)
+
+<p align="center">
+  <img src="Readme/GIF1.gif" width="50%" />
+</p>
+  
+<p align="center">
+  <img src="Readme/GIF2.gif" width="45%" />
+  <img src="Readme/GIF3.gif" width="45%" />
+</p>
+
+![Image](Readme/Image.png)
+![features](Readme/Image1.png)
