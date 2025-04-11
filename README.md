@@ -2,7 +2,7 @@
 
 ## 📌 About
 
-This game was created as a team for The Great Warwick Game Jam 2025. It was made using [Unity Game](https://unity.com/) Engine.
+This game was created as a team for The Great Warwick Game Jam 2025. It was made using [Unity](https://unity.com/) Game Engine.
 
 Team :-
 
