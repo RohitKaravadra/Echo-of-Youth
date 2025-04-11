@@ -24,4 +24,3 @@ You can play this game at [Echo of Youth](https://vec1or2000.itch.io/echo-of-you
 </p>
 
 ![Image](Readme/Image.png)
-![features](Readme/Image1.png)
