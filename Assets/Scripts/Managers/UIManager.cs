@@ -1,47 +1,90 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
     [SerializeField] GameObject _PausePanel;
-    [Space(5)]
-    [SerializeField] Button _AirControlButton;                   // **for testing only
-    [SerializeField] TextMeshProUGUI _AirControlButtonText;      // **for testing only
+    [Space(10)]
+    [SerializeField] Slider _MasterSlider;
+    [SerializeField] Slider _MusicSlider;
+    [SerializeField] Slider _SFXSlider;
+    [SerializeField] AudioMixer _Mixer;
+
+    private void Start()
+    {
+        SetVolume();
+        SetSliders();
+    }
 
     private void OnEnable()
     {
-        _AirControlButton.onClick.AddListener(OnAirControlButton);
-        GameEvents.Game.OnGameStateChanged += OnGameStateChange;
+        GameEvents.Game.OnGamePause += PauseGame;
     }
 
     private void OnDisable()
     {
-        _AirControlButton.onClick.RemoveListener(OnAirControlButton);
-        GameEvents.Game.OnGameStateChanged -= OnGameStateChange;
+        GameEvents.Game.OnGamePause -= PauseGame;
     }
-
-    private void OnGameStateChange(GameState _state)
+    private void SetSliders()
     {
-        _PausePanel.SetActive(_state == GameState.Pause);
+        _MasterSlider.onValueChanged.AddListener((val) =>
+        {
+            _Mixer.SetFloat("Master", AudioManager.PrToDb(val));
+            PlayerPrefs.SetFloat("Master", val);
+        });
+        _MusicSlider.onValueChanged.AddListener((val) =>
+        {
+            _Mixer.SetFloat("Music", AudioManager.PrToDb(val));
+            PlayerPrefs.SetFloat("Music", val);
+        });
+        _SFXSlider.onValueChanged.AddListener((val) =>
+        {
+            _Mixer.SetFloat("SFX", AudioManager.PrToDb(val));
+            PlayerPrefs.SetFloat("SFX", val);
+        });
     }
 
-    // **for testing only
-    private void OnAirControlButton()
+    private void SetVolume()
     {
-        Settings.s_AirControlEnabled = !Settings.s_AirControlEnabled;
-        _AirControlButtonText.text = Settings.s_AirControlEnabled ? "Air Control Enabled" : "Air Control Disabled";
-        GameEvents.UI.OnAirControlChanged?.Invoke();
+        float val = PlayerPrefs.GetFloat("Master", 100);
+        _Mixer.SetFloat("Master", AudioManager.PrToDb(val));
+        _MasterSlider.value = val;
+
+        val = PlayerPrefs.GetFloat("Music", 100);
+        _Mixer.SetFloat("Music", AudioManager.PrToDb(val));
+        _MusicSlider.value = val;
+
+        val = PlayerPrefs.GetFloat("SFX", 100);
+        _Mixer.SetFloat("SFX", AudioManager.PrToDb(val));
+        _SFXSlider.value = val;
+
     }
 
-    public void OnResumeButton()
-    {
-        GameEvents.Input.OnUICancel.Invoke();
-    }
+    private void PauseGame(bool pause) => _PausePanel.SetActive(pause);
 
+    public void OnResumeButton() => GameEvents.Input.OnUICancel.Invoke();
+    public void OnRestartButton() => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     public void OnExitButton()
     {
+        Time.timeScale = 1.0f;
         SceneManager.LoadScene((int)Scenes.MainMenu);
+    }
+
+    public void OnMastreVolumeSlider(float val)
+    {
+        print("Master");
+    }
+
+    public void OnMusicVolumeSlider(float val)
+    {
+        print("Music");
+    }
+
+    public void OnSFXVolumeSlider(float val)
+    {
+        print("SFX");
     }
 }

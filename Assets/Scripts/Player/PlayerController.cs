@@ -1,0 +1,348 @@
+
+using UnityEngine;
+
+public class PlayerController : MonoBehaviour
+{
+    [Header("For Testing")]
+    [SerializeField] bool _EnableGun;
+    [SerializeField] Character _Character;
+    [Space(10)]
+    [SerializeField] float _CoyoteTime;
+    [SerializeField][Range(0.0001f, 0.1f)] float _MoveThreshold;
+    [Space(5)]
+    [SerializeField] float _Gravity;
+    [SerializeField] float _MaxGravity;
+    [Space(5)]
+    [SerializeField][Range(1, 20)] int _MaxIteration;
+    [SerializeField][Range(0, 1)] float _GroundDistance;
+    [SerializeField][Range(0, 1)] float _CellingDistance;
+    [SerializeField][Range(0, 1)] float _WallDistance;
+    [Space(5)]
+    [SerializeField][Range(0, 90)] float _GravitySlideAngle;
+    [SerializeField][Range(0, 90)] float _SurfaceSlideAngle;
+    [Space(5)]
+    [SerializeField] LayerMask _GroundLayers;
+    [SerializeField] ShakeData _DeathShake;
+    [SerializeField] float _RespawnTime;
+    [Space(5)]
+    [SerializeField] CapsuleCollider2D _Collider;
+    [SerializeField] Animator _Animator;
+    [SerializeField] Transform _Visuals;
+    [SerializeField] ReverseGun _Gun;
+    [SerializeField] Ragdoll _Ragdoll;
+    [SerializeField] ParticleSystem _BloodParticles;
+    [SerializeField] CharacterCreator _CharacterCreater;
+    [SerializeField] PlayerData _PlayerData;
+
+    // Input variables
+    Vector2 _MoveInput;
+
+    Rigidbody2D _Rb;
+    Rigidbody2D.SlideMovement _SlideData;
+
+    ContactFilter2D _GroundFilter;
+    RaycastHit2D[] _HitResults = new RaycastHit2D[2];
+    Rigidbody2D _Ground = null;
+
+    PlayerStats _Stats;
+
+    bool _IsAlive;
+    bool _IsGrounded;
+    bool _IsJumping;
+    bool _IsMoving;
+
+    bool _IsHeadCollide;
+    bool _IsWallCollide;
+    bool _CanJump;
+    bool IsCoyote => !_IsJumping && Time.time - _LastGroundTime < _CoyoteTime;
+
+    float _LastGroundTime;
+    int _JumpCount;
+
+    int _XDirection = 1;
+    Vector2 _Velocity = Vector2.zero;
+
+    Vector2 _InitialPos;
+
+    private void Awake()
+    {
+        _Rb = GetComponent<Rigidbody2D>();
+        _IsAlive = true;
+    }
+
+    private void Start()
+    {
+        _InitialPos = transform.position;
+        _Gun.Enabled = _EnableGun;
+        SetData();
+
+        // set camera follow target to this object
+        CameraManager.Instance.FollowTarget = transform;
+    }
+
+    private void OnEnable()
+    {
+        GameEvents.Input.OnPlayerMove += OnMove;        // Subscribe to Move Input
+        GameEvents.Input.OnPlayerJump += OnJump;        // Subscribe to Jump Input
+        GameEvents.Game.OnCheckPointReached += OnCheckPoint;
+    }
+
+    private void OnDisable()
+    {
+        GameEvents.Input.OnPlayerMove -= OnMove;        // Unsubscribe from Move Input
+        GameEvents.Input.OnPlayerJump -= OnJump;        // Unsubscribe from Jump Input
+        GameEvents.Game.OnCheckPointReached -= OnCheckPoint;
+    }
+
+    private void Update()
+    {
+        if (!_IsAlive)
+            return;
+
+        CheckCollision();                   // check head and foot collisions
+        UpdateJump();                       // update jump data
+        SetAnimations();                    // set animation states
+        UpdateMovement(Time.deltaTime);     // update movement velocities
+    }
+
+    private void FixedUpdate()
+    {
+        if (!_IsAlive)
+            return;
+        Move(Time.fixedDeltaTime);  // apply movement
+    }
+
+    private void OnDestroy()
+    {
+        CancelInvoke(nameof(OnRespawn));
+    }
+
+    /// <summary>
+    /// Set default Slide data
+    /// </summary>
+    private void SetData()
+    {
+        // inititalize variables
+        _XDirection = 1;
+        _Velocity = Vector2.zero;
+
+        _LastGroundTime = Time.time;
+
+        // Set ground filter for foot and head collision check
+        _GroundFilter.useLayerMask = true;
+        _GroundFilter.layerMask = _GroundLayers;
+
+        // set slide data for movement collisions
+        _SlideData.maxIterations = _MaxIteration;
+        _SlideData.gravitySlipAngle = _GravitySlideAngle;
+        _SlideData.surfaceSlideAngle = _SurfaceSlideAngle;
+
+        _SlideData.gravity = Vector2.down;
+        _SlideData.surfaceUp = Vector2.up;
+
+        _SlideData.SetLayerMask(_GroundLayers);
+        _SlideData.useSimulationMove = false;
+
+        // set character
+        _Stats = _PlayerData.Get(_Character);
+        _CharacterCreater.Create(_Stats.sprites);
+
+        // set visuals and colliders
+        _Visuals.localScale = Vector3.one * _Stats.scale;
+        _Collider.size *= _Stats.scale;
+        _Collider.offset = _Collider.transform.localPosition * _Stats.scale - _Collider.transform.localPosition;
+    }
+
+    private void SetYVelocity(float deltaTime)
+    {
+        // check for head collision
+        if (_IsHeadCollide && _Velocity.y > 0)
+        {
+            _Velocity.y = 0;
+            return;
+        }
+
+        // update gravity
+        _Velocity.y = (_IsGrounded ? 0 : _Velocity.y) - _Gravity * deltaTime;
+        _Velocity.y = Mathf.Clamp(_Velocity.y, -_MaxGravity, _MaxGravity);
+    }
+
+    private void SetXVelocity(float deltaTime)
+    {
+        // check if jumping and collides 
+        if (!_IsGrounded && _IsWallCollide)
+        {
+            _Velocity.x = -_Velocity.x * 0.3f;
+            return;
+        }
+
+        // udate direction
+        _XDirection = _IsMoving ? (_MoveInput.x > 0 ? 1 : -1) : _XDirection;
+
+        // check for air controll
+        float control = _XDirection * (_IsMoving && !_IsGrounded ? _Stats.airControl : 1);
+
+        // update speed and acceleration
+        float speed = (_IsMoving ? _Stats.speed : 0) * control;
+        float accel = _IsMoving ? _Stats.acceleration : _Stats.deceleration;
+
+        // set velocity
+        _Velocity.x = Mathf.Abs(_Velocity.x - speed) > _MoveThreshold ?
+            Mathf.Lerp(_Velocity.x, speed, deltaTime * accel)
+            : speed;
+
+        // swap visuals if needed
+        if (_Velocity.x != 0)
+            _Visuals.localScale = new Vector3(_Velocity.x < 0 ? -1 : 1, 1, 1) * _Stats.scale;
+    }
+
+    private void UpdateMovement(float deltaTime)
+    {
+        _IsMoving = _MoveInput.x != 0;
+        SetYVelocity(deltaTime);    // Set vertical velocity
+        SetXVelocity(deltaTime);    // Set horizontal velocity
+    }
+
+    private void Move(float deltaTime)
+    {
+        // set ground snap distance to prevent snapping when jump
+        _SlideData.surfaceAnchor = new Vector2(0, _IsJumping ? 0 : -_GroundDistance);
+
+        // update position
+        Vector2 pos = _Rb.Slide(_Velocity, deltaTime, _SlideData).position;
+
+        // apply moving objects velocity
+        if (_Ground != null)
+            pos.x += _Ground.linearVelocityX * deltaTime;
+
+        // update new position of rigidbody
+        _Rb.MovePosition(pos);
+    }
+
+    void UpdateJump()
+    {
+        // reset jumping
+        _IsJumping = _IsJumping && !_IsGrounded;
+
+        // reset jump count on grounded
+        if (_IsGrounded && _JumpCount > 0)
+            _JumpCount = 0;
+
+        _CanJump = _IsGrounded || (_IsJumping && _JumpCount < _Stats.maxJumpCount) || IsCoyote;
+    }
+
+    void SetJump()
+    {
+        if (!_CanJump)
+            return;
+
+        _Velocity.y = _Stats.jumpForce;
+        _IsJumping = true;
+        _JumpCount++;
+        AudioManager.Instance?.PlaySound(AudioFile.Jump);
+    }
+
+    void CheckCollision()
+    {
+        bool wasGrounded = _IsGrounded;
+
+        _IsGrounded = _Velocity.y <= 0 && _Collider.Cast(Vector2.down, _GroundFilter, _HitResults, _GroundDistance) > 0;     // foot collision
+
+        if (!_IsGrounded || !_HitResults[0].transform.TryGetComponent(out _Ground))
+            _Ground = null;
+
+        _IsHeadCollide = _Velocity.y > 0 && _Collider.Cast(Vector2.up, _GroundFilter, _HitResults, _CellingDistance) > 0;    // head collision
+        _IsWallCollide = _Collider.Cast(Vector2.right * _XDirection, _GroundFilter, _HitResults, _WallDistance) > 0;         // wall collision
+
+        if (wasGrounded && !_IsGrounded)
+            _LastGroundTime = Time.time;
+    }
+
+    private void OnDeath()
+    {
+        _IsAlive = false;
+        _Rb.simulated = false;
+        _Ragdoll.Enable();
+        _Gun.Enabled = false;
+
+        _BloodParticles.Play();
+        AudioManager.Instance?.PlaySound(AudioFile.Blood);
+
+        if (CameraManager.HasInstance)
+            CameraManager.Instance.ApplyShake(_DeathShake);
+        if (InputManager.HasInstance)
+            InputManager.Instance.SetInput(false);
+
+        GameEvents.Game.OnPlayerDead?.Invoke();
+
+        Invoke(nameof(OnRespawn), _RespawnTime);
+    }
+
+    private void OnRespawn()
+    {
+        _Ragdoll.Disable();
+
+        transform.position = _InitialPos;
+        _Gun.Enabled = _EnableGun;
+
+        _IsAlive = true;
+        _Rb.simulated = true;
+
+        if (InputManager.Instance != null)
+            InputManager.Instance.SetInput(true);
+    }
+
+    void SetAnimations()
+    {
+        if (_Animator == null)
+            return;
+
+        _Animator.SetBool("Move", _IsMoving);
+        _Animator.SetBool("Grounded", _IsGrounded);
+    }
+
+    void OnJump(bool _val)
+    {
+        if (_val) SetJump();
+    }
+
+    void OnMove(Vector2 _dir) => _MoveInput = _dir; // input direction
+
+    private void OnDrawGizmos()
+    {
+        //debug head collision ray
+        if (_Collider != null)
+        {
+            float hBody = _Collider.size.y / 2;
+
+            Gizmos.color = Color.red;
+            Gizmos.DrawRay(_Collider.transform.position + Vector3.up * hBody, Vector2.up * _CellingDistance);
+            Gizmos.DrawRay(_Collider.transform.position + Vector3.down * hBody, Vector2.down * _GroundDistance);
+            Gizmos.DrawRay(_Collider.transform.position + (_Collider.size.x * _XDirection * Vector3.right / 2),
+                _WallDistance * _XDirection * Vector2.right);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Danger") && _IsAlive)
+            OnDeath();
+        else if (collision.CompareTag("Gun"))
+        {
+            if (!_EnableGun)
+            {
+                _EnableGun = true;
+                _Gun.Enabled = true;
+            }
+            Destroy(collision.gameObject);
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.transform.CompareTag("Danger") && _IsAlive)
+            OnDeath();
+    }
+
+    private void OnCheckPoint(Vector2 pos) => _InitialPos = pos;
+}

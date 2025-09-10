@@ -306,13 +306,13 @@ MonoBehaviour:
     m_Value: 1
   threshold:
     m_OverrideState: 1
-    m_Value: 0.9
+    m_Value: 6.33
   intensity:
     m_OverrideState: 1
-    m_Value: 0
+    m_Value: 7.22
   scatter:
     m_OverrideState: 1
-    m_Value: 0.7
+    m_Value: 0.479
   clamp:
     m_OverrideState: 1
     m_Value: 65472
@@ -558,16 +558,16 @@ MonoBehaviour:
     m_Value: 0
   paperWhite:
     m_OverrideState: 1
-    m_Value: 300
+    m_Value: 400
   detectBrightnessLimits:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 0
   minNits:
     m_OverrideState: 1
-    m_Value: 0.005
+    m_Value: 47.9
   maxNits:
     m_OverrideState: 1
-    m_Value: 1000
+    m_Value: 5000
 --- !u!114 &2332282131777942337
 MonoBehaviour:
   m_ObjectHideFlags: 3

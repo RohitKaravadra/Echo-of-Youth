@@ -1,52 +1,35 @@
 using UnityEngine;
 using System;
-using JetBrains.Annotations;
 
 [Serializable]
-public enum GameState
+public enum TriggerEvents
 {
-    None,
-    Start,
-    Play,
-    Pause,
-    Over
+    GameOver,
+    CheckPoint
 }
 
 [Serializable]
 public enum Scenes
 {
     MainMenu = 0,
-    Level = 1
-}
-
-[Serializable]
-public struct PlayerStats
-{
-    public float walkSpeed;
-    public float sprintSpeed;
-    [Space(5)]
-    public float jumpForce;
-    [Range(1, 5)] public int maxJumpCount;
-    [Space(5)]
-    [Range(0, 100)] public float acceleration;
-    [Range(0, 100)] public float deceleration;
+    Level1 = 1,
+    Level2 = 2,
+    Level3 = 3
 }
 
 public static class GameEvents
 {
     public static class Game
     {
-        public static Action<GameState> OnGameStateChanged;
+        public static Action<bool> OnGamePause;
+        public static Action OnLevelOver;
+        public static Action<Vector2> OnCheckPointReached;
+        public static Action OnPlayerDead;
     }
 
     public static class UI
     {
-        public static Action OnAirControlChanged;
-    }
-
-    public static class Camera
-    {
-
+        public static Action<Dialogue> OnDialogueTriggered;
     }
 
     public static class Input
@@ -55,11 +38,10 @@ public static class GameEvents
         public static Action<Vector2> OnPlayerLook;
         public static Action<bool> OnPlayerJump;
         public static Action<bool> OnPlayerSprint;
+        public static Action<bool> OnObjectSelect;
+        public static Action<bool> OnObjectReverse;
         public static Action OnUICancel;
-    }
-}
 
-public static class Settings
-{
-    public static bool s_AirControlEnabled = false; // **for testing only
+        public static Action<bool> OnSetInputState;
+    }
 }
